@@ -1,5 +1,11 @@
 # Website validation
 
+## Audivoya rebrand
+
+On October 3, 2026, the publisher selected **Audivoya - AI Dubbing & Captions**. The site uses Audivoya as its compact wordmark and the full title in homepage metadata/sharing artwork, with the existing Listen beyond language tagline. Current copy, policies, guide and screenshot provenance are refreshed; historical deployment evidence below retains the earlier name. Stable public paths and the private extension repository are preserved. No analytics, credentials, payment UI, dependencies or CSP changes are introduced.
+
+Local `npm run check` verifies all 17 public output files, including the new real primary-panel screenshot from extension 0.2.9. Eight desktop/mobile browser cases pass, and source/build validation rejects retired product text. Screenshot review confirms the branded header, empty key field and setup-only state; the native screenshot is clipped to the visible header/primary controls to avoid Chromium popup compositing beyond its viewport. Google documentation remains separately attributed. Gitleaks reports no known secret pattern in the public build; npm audit reports zero known development-package vulnerabilities. Public deployment and anonymous live checks follow the protected PR/Pages workflow.
+
 Prepared October 3, 2026. This is a website release record; it does not certify store approval, installed user Edge behavior or live dubbing latency.
 
 ## Evidence scope

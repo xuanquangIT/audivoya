@@ -1,7 +1,12 @@
 {
   "captured": "2026-10-03",
-  "extension": "0.2.7",
+  "extension": "0.2.9",
+  "name": "Audivoya - AI Dubbing & Captions",
   "browser": "153.0.8010.12",
   "mode": "Real installed extension action popup, owned local page, setup only; no API key or provider requests",
-  "files": ["extension-setup.png", "extension-settings.png"]
+  "files": [
+    "extension-setup.png",
+    "extension-panel.png",
+    "extension-settings.png"
+  ]
 }

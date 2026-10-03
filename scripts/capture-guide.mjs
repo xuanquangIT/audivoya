@@ -1,18 +1,21 @@
 // Uses a disposable browser and owned media. Never reads an account profile or .env.
 import { chromium } from '@playwright/test';
 import { createServer } from 'node:http';
-import { mkdtemp, mkdir, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 const extension = process.argv[2];
 if (!extension) throw new Error('Pass the extension dist/chromium directory.');
+const manifest = JSON.parse(
+  await readFile(path.join(extension, 'manifest.json'), 'utf8'),
+);
 const output = new URL('../public/assets/guide/', import.meta.url);
 await mkdir(output, { recursive: true });
 const server = createServer((_request, response) => {
   response.writeHead(200, { 'Content-Type': 'text/html' });
   response.end(
-    '<!doctype html><html lang="en"><meta charset="utf-8"><title>Owned media setup</title><body><h1>Realtime Dubbing setup</h1><p>Owned local media; no provider connected.</p><video controls></video></body></html>',
+    '<!doctype html><html lang="en"><meta charset="utf-8"><title>Owned media setup</title><body><h1>Audivoya setup</h1><p>Owned local media; no provider connected.</p><video controls></video></body></html>',
   );
 }).listen(4181, '127.0.0.1');
 const profile = await mkdtemp(path.join(tmpdir(), 'rd-site-capture-'));
@@ -113,7 +116,7 @@ try {
   }
   const capture = async (selector, name) => {
     const bounds = await evaluate(
-      `(() => { const element = document.querySelector(${JSON.stringify(selector)}); element.scrollIntoView({ block: 'start' }); const b = element.getBoundingClientRect(); return { x: b.left + scrollX, y: b.top + scrollY, width: b.width, height: b.height, scale: 1 }; })()`,
+      `(() => { const element = document.querySelector(${JSON.stringify(selector)}); element.scrollIntoView({ block: 'start' }); const b = element.getBoundingClientRect(); const bottom = ${JSON.stringify(selector)} === '.app' ? document.querySelector('.controls').getBoundingClientRect().bottom : b.bottom; return { x: b.left + scrollX, y: b.top + scrollY, width: b.width, height: bottom - b.top, scale: 1 }; })()`,
     );
     const shot = await call('Page.captureScreenshot', {
       format: 'png',
@@ -123,6 +126,7 @@ try {
     await writeFile(new URL(name, output), Buffer.from(shot.data, 'base64'));
   };
   await capture('.controls', 'extension-setup.png');
+  await capture('.app', 'extension-panel.png');
   await evaluate("document.getElementById('settings').open = true");
   await capture('#settings', 'extension-settings.png');
   await writeFile(
@@ -130,10 +134,15 @@ try {
     JSON.stringify(
       {
         captured: '2026-10-03',
-        extension: '0.2.7',
+        extension: manifest.version,
+        name: manifest.name,
         browser: await context.browser().version(),
         mode: 'Real installed extension action popup, owned local page, setup only; no API key or provider requests',
-        files: ['extension-setup.png', 'extension-settings.png'],
+        files: [
+          'extension-setup.png',
+          'extension-panel.png',
+          'extension-settings.png',
+        ],
       },
       null,
       2,
@@ -148,6 +157,7 @@ try {
 }
 
 // Public documentation is accessible without signing in to a personal account.
+if (process.argv.includes('--extension-only')) process.exit(0);
 const browser = await chromium.launch({ headless: true });
 try {
   const page = await browser.newPage({

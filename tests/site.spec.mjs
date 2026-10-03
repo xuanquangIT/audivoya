@@ -14,6 +14,10 @@ test('all public pages render without horizontal overflow, broken images or exte
   for (const route of ['', 'guide/', 'privacy/', 'support/', 'terms/']) {
     const response = await page.goto(site.base + route);
     expect(response.status()).toBe(200);
+    await expect(page.locator('.site-header .wordmark')).toContainText(
+      'Audivoya',
+    );
+    await expect(page.locator('body')).not.toContainText('Realtime Dubbing');
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
     expect(
       await page.evaluate(

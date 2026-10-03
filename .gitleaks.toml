@@ -1,4 +1,4 @@
-title = "Realtime Dubbing website credential detection"
+title = "Audivoya website credential detection"
 [extend]
 useDefault = true
 [[rules]]

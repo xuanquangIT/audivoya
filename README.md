@@ -1,8 +1,10 @@
-# Realtime Dubbing website
+# Audivoya - AI Dubbing & Captions
 
-Public product information, setup guide, privacy policy, support and terms for Realtime Dubbing. Publisher: Quang Vu.
+Public product information, setup guide, privacy policy, support and terms for Audivoya. Publisher: Quang Vu.
 
 Production URL: https://xuanquangit.github.io/realtime-dubbing-site/
+
+Audivoya is the publisher-selected product brand, formerly Realtime Dubbing. Repository names and public paths remain stable to preserve installed links and privacy references; trademark/domain clearance is not claimed by this rename. The compact wordmark is Audivoya and the complete product title is Audivoya - AI Dubbing & Captions.
 
 The extension repository stays private. This site does not contain its source, API credentials, recordings or distributions. Chrome and Edge store listings are pending; no install link is invented.
 
