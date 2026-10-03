@@ -4,7 +4,7 @@ export const site = Object.freeze({
   publisher: 'Quang Vu',
   email: 'xuanquang.work.it@gmail.com',
   origin: 'https://xuanquangit.github.io',
-  base: '/realtime-dubbing-site/',
+  base: '/audivoya/',
   updated: '2026-10-03',
   extensionVersion: '0.2.9',
   // Keep empty until the publisher has verified public, approved listings.

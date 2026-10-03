@@ -67,7 +67,7 @@ test('honest install state, keyboard FAQ and setup navigation work', async ({
 test('CSP blocks unexpected scripts and every external tab link has isolation', async ({
   page,
 }) => {
-  await page.route('**/realtime-dubbing-site/privacy/', async (route) => {
+  await page.route('**/audivoya/privacy/', async (route) => {
     const response = await route.fetch();
     const original = await response.text();
     await route.fulfill({
