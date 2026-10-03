@@ -1157,7 +1157,17 @@ details[open] summary {
     padding-block: 13px;
   }
   .wordmark {
-    font-size: 17px;
+    font-size: 16px;
+    gap: 7px;
+  }
+  .wordmark img {
+    width: 30px;
+    height: 30px;
+  }
+  .beta-label {
+    font-size: 9px;
+    padding-inline: 5px;
+    margin-left: 0;
   }
   .nav-bar nav {
     gap: 28px;
@@ -1168,8 +1178,9 @@ details[open] summary {
     letter-spacing: 1.3px;
   }
   .hero h1 {
-    font-size: clamp(36px, 8.9vw, 51px);
+    font-size: clamp(31px, 8.9vw, 51px);
     letter-spacing: -1.8px;
+    white-space: normal;
   }
   .hero-description {
     font-size: 15px;

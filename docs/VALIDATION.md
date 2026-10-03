@@ -15,3 +15,5 @@ Deployment and exact final outcomes are appended after live verification. The si
 ## Local release checks
 
 Windows, Node.js 24.11.1 and Playwright Chromium 153.0.8010.12: `npm run check` passes for all 16 public output files; all eight desktop/mobile browser cases pass. `npm audit` reports zero known vulnerabilities across five development-package records. Screenshot review confirms a clean Ready state on the owned localhost page, an empty key field and no account identities. Static artwork is illustrative and does not depict a translated provider result.
+
+The first Linux CI run exposed horizontal overflow at the 320-pixel desktop viewport with Linux fallback fonts. Mobile title wrapping and header spacing were adjusted without weakening the assertion. Deployment is held behind the same browser check; the failed run remains visible for audit.
