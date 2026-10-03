@@ -1,5 +1,9 @@
 # Website validation
 
+## Microsoft Edge setup guidance
+
+Added Edge-specific instructions to the installation guide: use the verified Edge Add-ons listing when public, show the extension in Edge's toolbar, grant the optional displayed Google API origin for dubbing and use Audio monitor without a provider key. The guide explains browser-session key deletion on restart/reload and where to manage/remove the extension. Existing privacy, provider-charge and delayed-viewing disclosures are unchanged. No public install link is enabled solely from a draft or successful API submission.
+
 ## Full translation language catalog (extension candidate 0.2.10)
 
 On October 3, 2026, replaced three-language product claims with all 78 named targets documented for Gemini Live Translation. The reviewed model-specific snapshot matches the extension, including the Norwegian alias. Home, feature copy, guide, FAQ, support and metadata use the complete catalog. An accessible expandable list displays all names and links to Google's source. The text distinguishes provider-documented coverage from all-language listening validation. Existing owned screenshots remain setup examples with Vietnamese selected.
