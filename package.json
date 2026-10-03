@@ -1,0 +1,21 @@
+{
+  "name": "realtime-dubbing-site",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "LicenseRef-Proprietary",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "node scripts/serve.mjs",
+    "check": "npm run build && node scripts/check.mjs && prettier --check .",
+    "test:e2e": "playwright test",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "prettier": "3.9.9"
+  }
+}

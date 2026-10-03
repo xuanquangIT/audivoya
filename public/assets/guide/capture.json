@@ -1,0 +1,7 @@
+{
+  "captured": "2026-10-03",
+  "extension": "0.2.7",
+  "browser": "153.0.8010.12",
+  "mode": "Real installed extension action popup, owned local page, setup only; no API key or provider requests",
+  "files": ["extension-setup.png", "extension-settings.png"]
+}
