@@ -17,3 +17,9 @@ Deployment and exact final outcomes are appended after live verification. The si
 Windows, Node.js 24.11.1 and Playwright Chromium 153.0.8010.12: `npm run check` passes for all 16 public output files; all eight desktop/mobile browser cases pass. `npm audit` reports zero known vulnerabilities across five development-package records. Screenshot review confirms a clean Ready state on the owned localhost page, an empty key field and no account identities. Static artwork is illustrative and does not depict a translated provider result.
 
 The first Linux CI run exposed horizontal overflow at the 320-pixel desktop viewport with Linux fallback fonts. Mobile title wrapping and header spacing were adjusted without weakening the assertion. Deployment is held behind the same browser check; the failed run remains visible for audit.
+
+## Public deployment
+
+[Linux Pages run 37107595941](https://github.com/xuanquangIT/realtime-dubbing-site/actions/runs/37107595941) passed all checks and deployed commit `0293c5b`. The initial failed run `37107458070` remains visible; the narrow-font regression is resolved in the subsequent run.
+
+Anonymous live verification on October 3, 2026 matches all 15 served files to the local artifact byte for byte. A fresh Chromium context passes 15 page/viewport combinations (five pages at 1440, 390 and 320 CSS pixels), with loaded images, no horizontal overflow and zero requests to other origins. Screenshots and `live-verification.json` remain local under ignored `artifacts`. The site is accessible without GitHub sign-in, including `/guide/`, `/privacy/`, `/support/` and `/terms/`. GitHub Pages reports HTTPS enforcement enabled. These checks do not establish translation quality or store approval.

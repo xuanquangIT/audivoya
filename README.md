@@ -17,6 +17,7 @@ npm run dev
 npm run check
 npx playwright install chromium
 npm run test:e2e
+node scripts/verify-live.mjs
 ```
 
 Open http://127.0.0.1:4180/realtime-dubbing-site/. The preview uses the real deployment base so path failures are visible locally.
