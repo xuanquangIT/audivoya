@@ -40,6 +40,10 @@ for (const file of files) {
   );
   if (!/\.(html|css|js|svg|json|xml|txt)$/.test(file)) continue;
   const text = await readFile(file, 'utf8');
+  assert(
+    !text.includes('Realtime Dubbing'),
+    'Retired public product brand: ' + relative,
+  );
   for (const pattern of credentials)
     assert(
       !pattern.test(text),

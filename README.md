@@ -1,8 +1,10 @@
-# Realtime Dubbing website
+# Audivoya - AI Dubbing & Captions
 
-Public product information, setup guide, privacy policy, support and terms for Realtime Dubbing. Publisher: Quang Vu.
+Public product information, setup guide, privacy policy, support and terms for Audivoya. Publisher: Quang Vu.
 
-Production URL: https://xuanquangit.github.io/realtime-dubbing-site/
+Production URL: https://xuanquangit.github.io/audivoya/
+
+Audivoya is the publisher-selected product brand, formerly Realtime Dubbing. The publisher requested new repository and website URLs before store submission: public website repository `xuanquangIT/audivoya`, private extension repository `xuanquangIT/audivoya-extension`, and Pages base `/audivoya/`. Trademark/domain clearance is not claimed by this rename. The compact wordmark is Audivoya and the complete product title is Audivoya - AI Dubbing & Captions.
 
 The extension repository stays private. This site does not contain its source, API credentials, recordings or distributions. Chrome and Edge store listings are pending; no install link is invented.
 
@@ -20,7 +22,7 @@ npm run test:e2e
 node scripts/verify-live.mjs
 ```
 
-Open http://127.0.0.1:4180/realtime-dubbing-site/. The preview uses the real deployment base so path failures are visible locally.
+Open http://127.0.0.1:4180/audivoya/. The preview uses the real deployment base so path failures are visible locally.
 
 ## Structure
 
