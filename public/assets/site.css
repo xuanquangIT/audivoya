@@ -1381,3 +1381,34 @@ details[open] summary {
     transition: none !important;
   }
 }
+
+.language-catalog {
+  border-top: 1px solid var(--line, #d8e1d7);
+  border-bottom: 1px solid var(--line, #d8e1d7);
+  padding: 22px 0;
+  margin: 24px 0;
+}
+.language-catalog summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.supported-languages {
+  columns: 3;
+  column-gap: 35px;
+  padding-left: 22px;
+  margin-top: 25px;
+  line-height: 1.8;
+}
+.supported-languages li {
+  break-inside: avoid;
+}
+@media (max-width: 900px) {
+  .supported-languages {
+    columns: 2;
+  }
+}
+@media (max-width: 520px) {
+  .supported-languages {
+    columns: 1;
+  }
+}

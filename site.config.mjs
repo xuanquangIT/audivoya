@@ -6,7 +6,7 @@ export const site = Object.freeze({
   origin: 'https://xuanquangit.github.io',
   base: '/audivoya/',
   updated: '2026-10-03',
-  extensionVersion: '0.2.9',
+  extensionVersion: '0.2.10',
   // Keep empty until the publisher has verified public, approved listings.
   stores: Object.freeze({ chrome: null, edge: null }),
 });
