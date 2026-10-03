@@ -1,5 +1,11 @@
 # Website validation
 
+## Full translation language catalog (extension candidate 0.2.10)
+
+On October 3, 2026, replaced three-language product claims with all 78 named targets documented for Gemini Live Translation. The reviewed model-specific snapshot matches the extension, including the Norwegian alias. Home, feature copy, guide, FAQ, support and metadata use the complete catalog. An accessible expandable list displays all names and links to Google's source. The text distinguishes provider-documented coverage from all-language listening validation. Existing owned screenshots remain setup examples with Vietnamese selected.
+
+Local checks verify 17 public files, formatting, security/link/CSP guardrails. Ten desktop/mobile browser cases pass, including the full list, setup copy and expanded-list layout. Dependency audit reports zero known vulnerabilities. No new provider call, user credential, executable dependency, analytics or CSP relaxation is introduced. Public install links remain unavailable until a listing is verified; protected Pages deployment follows the reviewed merge.
+
 ## Audivoya rebrand
 
 On October 3, 2026, the publisher selected **Audivoya - AI Dubbing & Captions**. The site uses Audivoya as its compact wordmark and the full title in homepage metadata/sharing artwork, with the existing Listen beyond language tagline. The publisher also requested the new public URL `https://xuanquangit.github.io/audivoya/`, public repository `xuanquangIT/audivoya` and private extension repository `xuanquangIT/audivoya-extension` before store submission. Current copy, policies, guide and screenshot provenance are refreshed; historical deployment evidence below retains the earlier name/URL. No analytics, credentials, payment UI, dependencies or CSP changes are introduced.

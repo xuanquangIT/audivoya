@@ -38,7 +38,7 @@ Open http://127.0.0.1:4180/audivoya/. The preview uses the real deployment base 
 
 ## Content maintenance
 
-Verify feature claims against the extension before changing copy. Current output languages are Vietnamese, English and Spanish; the Chromium candidate targets desktop Chrome and Edge. Firefox, Safari and mobile live capture are not released. Do not promise instantaneous translation, exact word alignment, unlimited usage or every website.
+Verify feature claims against the extension before changing copy. The current Chromium candidate exposes all 78 output languages documented for Gemini Live Translation (79 accepted codes including the Norwegian alias); the Chromium candidate targets desktop Chrome and Edge. Firefox, Safari and mobile live capture are not released. Do not promise instantaneous translation, exact word alignment, unlimited usage or every website.
 
 After store approval, put the verified HTTPS listing URLs in `site.config.mjs` and update the explicit availability copy. Keep privacy disclosures aligned with actual extension/provider behavior. Deploy from a reviewed PR into `main`; GitHub Actions publishes only after checks pass.
 
@@ -49,3 +49,5 @@ GitHub Pages hosts this informational project site. There is no checkout, paymen
 `scripts/capture-guide.mjs <path-to-extension-dist/chromium>` captures the actual installed extension in a disposable test browser, from an owned localhost page. It never reads `.env`, sends provider audio, loads a personal profile or enters a real key. The Google image is its public API documentation, not a private dashboard; attribution and CC BY 4.0 link accompany it. Public capture metadata identifies the tested extension/browser. Re-check current Google instructions before publishing refreshed guides.
 
 See [security notes](docs/SECURITY.md), [validation](docs/VALIDATION.md) and [LICENSE](LICENSE).
+
+Language facts are versioned in `src/languages.json`, matching the extension’s reviewed catalog. Home, setup, support and metadata use that catalog; the full expandable language list links to the model-specific Google source. Generic Gemini Live agent/transcription language lists are not a substitute for the translation-model list.

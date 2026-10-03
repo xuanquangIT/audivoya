@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { site } from '../site.config.mjs';
+import languageCatalog from '../src/languages.json' with { type: 'json' };
 
 test('all public pages render without horizontal overflow, broken images or external requests', async ({
   page,
@@ -62,6 +63,37 @@ test('honest install state, keyboard FAQ and setup navigation work', async ({
   await expect(
     page.getByRole('link', { name: 'Google AI Studio → API keys' }),
   ).toHaveAttribute('href', 'https://aistudio.google.com/api-keys');
+});
+
+test('documents all translation languages with an accessible expandable list and matching setup copy', async ({
+  page,
+}) => {
+  await page.goto(site.base);
+  await expect(page.locator('.hero-description')).toContainText(
+    `${languageCatalog.languages.length} Gemini Live Translation languages`,
+  );
+  await page
+    .getByText(
+      `See all ${languageCatalog.languages.length} supported languages`,
+      { exact: true },
+    )
+    .click();
+  await expect(page.locator('.supported-languages li')).toHaveCount(
+    languageCatalog.languages.length,
+  );
+  expect(
+    await page.locator('.supported-languages li').allTextContents(),
+  ).toEqual(languageCatalog.languages.map((language) => language.name));
+  await expect(page.locator('.supported-languages')).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.goto(site.base + 'guide/');
+  await expect(page.locator('#start')).toContainText(
+    `all ${languageCatalog.languages.length} documented Gemini Live Translation languages`,
+  );
 });
 
 test('CSP blocks unexpected scripts and every external tab link has isolation', async ({
