@@ -1,5 +1,13 @@
 # Website validation
 
+## Audivoya 0.2.15 release guide (October 4, 2026)
+
+Updated the guide for Fullscreen / Exit fullscreen, external native fullscreen state such as F11, restoration of normal/maximized mode, picture fitting above expanded Controls, and bounded audio catch-up. Skipped translated speech and seek-handshake waiting are disclosed without claiming lower provider latency or guaranteed completeness. The versioned privacy/config copy now targets 0.2.15. Public install links remain pending store approval.
+
+Refreshed the setup/panel/settings screenshots from the actual packaged 0.2.15 action popup in a disposable Chromium profile on owned localhost content. No key, provider request, private content or user profile was used. The existing capture helper records the real date and crops to the visible native popup viewport to avoid compositor repetition beyond that viewport. Captions identify the crop and setup-only evidence; image dimensions match the captures. Google's separately attributed public documentation image is unchanged.
+
+Local build/link/CSP/secret checks verify 17 public files; all ten desktop/mobile browser cases pass. Formatting is normalized in this validation record after the initial check exposed a pre-existing formatting discrepancy. GitHub Pages deployment follows protected PR verification and merge. These website checks do not prove translation performance, store acceptance or capture startup stability.
+
 ## Collapsed sync controls and source playback (October 4, 2026, candidate 0.2.14)
 
 The guide describes a collapsed-by-default Controls panel, local play/pause, ten-second skips, playback speeds, volumes and mute. Playback commands affect the current source player immediately; seeking refills the delayed view. The guide preserves the source-tab fallback for inaccessible/custom/embedded players and blocked Play, as well as experimental synchronization limits. No website tracker, remote asset, dependency or credential flow changed. Local build/link/CSP/secret-pattern checks and ten desktop/mobile browser checks pass; public deployment follows protected-branch CI.
