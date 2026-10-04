@@ -51,3 +51,7 @@ GitHub Pages hosts this informational project site. There is no checkout, paymen
 See [security notes](docs/SECURITY.md), [validation](docs/VALIDATION.md) and [LICENSE](LICENSE).
 
 Language facts are versioned in `src/languages.json`, matching the extension’s reviewed catalog. Home, setup, support and metadata use that catalog; the full expandable language list links to the model-specific Google source. Generic Gemini Live agent/transcription language lists are not a substitute for the translation-model list.
+
+## Credential disclosure refresh (October 4, 2026)
+
+Website source now distinguishes the latest 0.2.11 automatic browser-profile encryption from earlier 0.2.10 session-only behavior. There is no companion/password setup. The encryption key lives in the same profile, so this is not an OS vault or protection against profile takeover. Deploy matching privacy copy before releasing the new extension; source changes alone do not update the public website.

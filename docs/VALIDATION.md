@@ -1,5 +1,9 @@
 # Website validation
 
+## Local credential disclosure update (October 4, 2026)
+
+Updated guide/home/privacy source for automatic browser-profile encryption in the 0.2.11 candidate, with explicit same-profile key limitations and the earlier 0.2.10 session-only behavior. No installer/password prompt is described. Existing screenshots are labeled as earlier candidate captures. Local build, link/anchor/CSP/secret-pattern checks, formatting and all ten desktop/mobile browser cases pass. Website source remains undeployed; older validation below records earlier deployments. No provider request or credential input occurs on this site.
+
 ## Microsoft Edge setup guidance
 
 Added Edge-specific instructions to the installation guide: use the verified Edge Add-ons listing when public, show the extension in Edge's toolbar, grant the optional displayed Google API origin for dubbing and use Audio monitor without a provider key. The guide explains browser-session key deletion on restart/reload and where to manage/remove the extension. Existing privacy, provider-charge and delayed-viewing disclosures are unchanged. No public install link is enabled solely from a draft or successful API submission.
