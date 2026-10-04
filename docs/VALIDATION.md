@@ -1,5 +1,9 @@
 # Website validation
 
+## Sync recovery controls (October 4, 2026, extension candidate 0.2.13)
+
+The guide now describes original/dubbed audio sliders and mute in the sync viewer, retaining picture/original audio during temporary translation reconnects, and closing a viewer when its session ends. Source-tab playback controls and experimental synchronization limits remain explicit. Local build/link/CSP/secret-pattern checks and all ten desktop/mobile E2E cases pass. Public deployment follows the protected PR merge.
+
 ## Same-website sessions (October 4, 2026, extension candidate 0.2.12)
 
 Updated the guide, homepage and privacy copy to describe default-on continuation through videos, full navigation, SPA route changes and reloads in the selected tab on the exact same origin. Another origin/subdomain, closing that tab, Stop or the original session time limit ends capture. Navigation origin checks are local; full URLs are not persisted or uploaded. Existing settings screenshots are labeled as earlier candidates rather than presenting them as captures of the new control. No capture, provider request or credential input occurs on this website. Local build, link/CSP/secret-pattern checks and formatting pass across 17 public files; all ten desktop/mobile E2E cases pass. Public deployment and exact live checks follow the protected PR merge.
