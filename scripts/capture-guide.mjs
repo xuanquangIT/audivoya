@@ -21,7 +21,7 @@ const server = createServer((_request, response) => {
 const profile = await mkdtemp(path.join(tmpdir(), 'rd-site-capture-'));
 const context = await chromium.launchPersistentContext(profile, {
   channel: 'chromium',
-  headless: false,
+  headless: true,
   viewport: { width: 1280, height: 900 },
   args: [
     '--disable-extensions-except=' + path.resolve(extension),
@@ -116,7 +116,7 @@ try {
   }
   const capture = async (selector, name) => {
     const bounds = await evaluate(
-      `(() => { const element = document.querySelector(${JSON.stringify(selector)}); element.scrollIntoView({ block: 'start' }); const b = element.getBoundingClientRect(); const bottom = ${JSON.stringify(selector)} === '.app' ? document.querySelector('.controls').getBoundingClientRect().bottom : b.bottom; return { x: b.left + scrollX, y: b.top + scrollY, width: b.width, height: bottom - b.top, scale: 1 }; })()`,
+      `(() => { const element = document.querySelector(${JSON.stringify(selector)}); element.scrollIntoView({ block: 'start' }); const b = element.getBoundingClientRect(); const bottom = ${JSON.stringify(selector)} === '.app' ? document.querySelector('.controls').getBoundingClientRect().bottom : b.bottom; const top = Math.max(0, b.top); return { x: b.left + scrollX, y: top + scrollY, width: b.width, height: Math.min(bottom, innerHeight) - top, scale: 1 }; })()`,
     );
     const shot = await call('Page.captureScreenshot', {
       format: 'png',
@@ -133,11 +133,11 @@ try {
     new URL('capture.json', output),
     JSON.stringify(
       {
-        captured: '2026-10-03',
+        captured: new Date().toISOString().slice(0, 10),
         extension: manifest.version,
         name: manifest.name,
         browser: await context.browser().version(),
-        mode: 'Real installed extension action popup, owned local page, setup only; no API key or provider requests',
+        mode: 'Real installed extension action popup, cropped to its visible viewport; owned local page, setup only; no API key or provider requests',
         files: [
           'extension-setup.png',
           'extension-panel.png',
@@ -146,7 +146,7 @@ try {
       },
       null,
       2,
-    ),
+    ) + '\n',
   );
   console.log(
     'Captured real extension setup and settings without credentials or uploads.',
