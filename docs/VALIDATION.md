@@ -1,5 +1,9 @@
 # Website validation
 
+## Same-website sessions (October 4, 2026, extension candidate 0.2.12)
+
+Updated the guide, homepage and privacy copy to describe default-on continuation through videos, full navigation, SPA route changes and reloads in the selected tab on the exact same origin. Another origin/subdomain, closing that tab, Stop or the original session time limit ends capture. Navigation origin checks are local; full URLs are not persisted or uploaded. Existing settings screenshots are labeled as earlier candidates rather than presenting them as captures of the new control. No capture, provider request or credential input occurs on this website. Local build, link/CSP/secret-pattern checks and formatting pass across 17 public files; all ten desktop/mobile E2E cases pass. Public deployment and exact live checks follow the protected PR merge.
+
 ## Local credential disclosure update (October 4, 2026)
 
 Updated guide/home/privacy source for automatic browser-profile encryption in the 0.2.11 candidate, with explicit same-profile key limitations and the earlier 0.2.10 session-only behavior. No installer/password prompt is described. Existing screenshots are labeled as earlier candidate captures. Local build, link/anchor/CSP/secret-pattern checks, formatting and all ten desktop/mobile browser cases pass. Website source remains undeployed; older validation below records earlier deployments. No provider request or credential input occurs on this site.
