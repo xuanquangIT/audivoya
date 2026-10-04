@@ -1,5 +1,9 @@
 # Website validation
 
+## Collapsed sync controls and source playback (October 4, 2026, candidate 0.2.14)
+
+The guide describes a collapsed-by-default Controls panel, local play/pause, ten-second skips, playback speeds, volumes and mute. Playback commands affect the current source player immediately; seeking refills the delayed view. The guide preserves the source-tab fallback for inaccessible/custom/embedded players and blocked Play, as well as experimental synchronization limits. No website tracker, remote asset, dependency or credential flow changed. Local build/link/CSP/secret-pattern checks and ten desktop/mobile browser checks pass; public deployment follows protected-branch CI.
+
 ## Sync recovery controls (October 4, 2026, extension candidate 0.2.13)
 
 The guide now describes original/dubbed audio sliders and mute in the sync viewer, retaining picture/original audio during temporary translation reconnects, and closing a viewer when its session ends. Source-tab playback controls and experimental synchronization limits remain explicit. Local build/link/CSP/secret-pattern checks and all ten desktop/mobile E2E cases pass. Public deployment follows the protected PR merge.
