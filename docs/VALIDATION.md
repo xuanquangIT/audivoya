@@ -1,5 +1,11 @@
 # Website validation
 
+## Chrome Web Store launch (October 6, 2026)
+
+Verified the publisher's Chrome Web Store URL resolves to the canonical `chromewebstore.google.com` listing for **Audivoya - AI Dubbing & Captions**, returns HTTP 200, and includes an **Add to Chrome** action. Home, setup guide, install section, FAQ, support copy and search metadata now identify version 0.2.15 as available for desktop Chrome and link directly to the listing. Edge remains marked pending until its own Add-ons publication is verified; the site does not imply that the Chrome listing is the Edge store listing. The store settings contain only the verified Chrome URL.
+
+The existing store-state browser assertion now expects one pending listing (Edge) instead of two. No new test was added. The Chrome item ID in the public URL is `epkhkijhmdajkhaedfdncdoaafdhnhlk`. No extension package, provider policy, key flow or privacy handling changed. Website install links remain independently verified per store.
+
 ## Audivoya 0.2.15 release guide (October 4, 2026)
 
 Updated the guide for Fullscreen / Exit fullscreen, external native fullscreen state such as F11, restoration of normal/maximized mode, picture fitting above expanded Controls, and bounded audio catch-up. Skipped translated speech and seek-handshake waiting are disclosed without claiming lower provider latency or guaranteed completeness. The versioned privacy/config copy now targets 0.2.15. Public install links remain pending store approval.

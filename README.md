@@ -40,7 +40,7 @@ Open http://127.0.0.1:4180/audivoya/. The preview uses the real deployment base 
 
 Verify feature claims against the extension before changing copy. The current Chromium candidate exposes all 78 output languages documented for Gemini Live Translation (79 accepted codes including the Norwegian alias); the Chromium candidate targets desktop Chrome and Edge. Firefox, Safari and mobile live capture are not released. Do not promise instantaneous translation, exact word alignment, unlimited usage or every website.
 
-After store approval, put the verified HTTPS listing URLs in `site.config.mjs` and update the explicit availability copy. Keep privacy disclosures aligned with actual extension/provider behavior. Deploy from a reviewed PR into `main`; GitHub Actions publishes only after checks pass.
+The desktop Chrome release is public. Its canonical Chrome Web Store URL is configured in `site.config.mjs`; keep the Edge listing pending until its own public listing is verified. Update the explicit availability copy when Edge is released. Keep privacy disclosures aligned with actual extension/provider behavior. Deploy from a reviewed PR into `main`; GitHub Actions publishes only after checks pass.
 
 GitHub Pages hosts this informational project site. There is no checkout, payment, credential form, login or commercial SaaS runtime. Reassess hosting before introducing those features under [GitHub Pages usage restrictions](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits).
 

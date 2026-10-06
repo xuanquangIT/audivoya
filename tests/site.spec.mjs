@@ -45,7 +45,7 @@ test('honest install state, keyboard FAQ and setup navigation work', async ({
   page,
 }) => {
   await page.goto(site.base);
-  await expect(page.locator('.store-pending')).toHaveCount(2);
+  await expect(page.locator('.store-pending')).toHaveCount(1);
   await expect(page.locator('.hero-note')).toContainText(
     'Google API fees may apply',
   );
