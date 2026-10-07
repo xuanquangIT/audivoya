@@ -5,8 +5,8 @@ export const site = Object.freeze({
   email: 'xuanquang.work.it@gmail.com',
   origin: 'https://xuanquangit.github.io',
   base: '/audivoya/',
-  updated: '2026-10-06',
-  extensionVersion: '0.2.15',
+  updated: '2026-10-07',
+  extensionVersion: '0.2.16',
   // Link only to an anonymously verified public store listing.
   stores: Object.freeze({
     chrome:

@@ -568,6 +568,22 @@ nav a[aria-current] {
   border-radius: var(--radius);
   padding: 40px 30px;
   position: relative;
+  margin: 0;
+}
+.sync-shot {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid #bac8b4;
+  border-radius: 10px;
+  box-shadow: 0 12px 25px #263a1510;
+}
+.shot-caption {
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-align: center;
+  margin: 12px 0 0;
+  color: var(--muted);
 }
 .diagram-window {
   background: #fff;

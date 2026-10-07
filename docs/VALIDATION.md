@@ -1,5 +1,13 @@
 # Website validation
 
+## Audivoya 0.2.16 guide refresh (October 7, 2026)
+
+Updated the guide, home page, FAQ, support and privacy copy for 0.2.16: the two Start choices (**Start dubbing** and **Start with sync window**, replacing the settings checkbox), the single Google audio-sharing/fees line with a Privacy & data link, and the **Stop automatically after** options from 5 minutes to 8 hours or Never (default 60 minutes). Never is described with its cost: capture and audio sent to Google continue, and Google API fees may accrue, until Stop, tab close or leaving the website.
+
+Recaptured the setup, panel and settings images from the packaged 0.2.16 action popup in a disposable Chromium profile, and added two images of the real sync window (picture, and Controls expanded) opened by clicking Start with sync window in Audio monitor. The source is a generated canvas page labelled as a demo clip; no key, provider request, third-party site, private content or user profile was used, so the images show no translated captions and no translation performance. The home sync illustration is replaced by the real window image. The capture helper now serves this owned demo page and drives the real Start with sync window button.
+
+Local build/link/CSP/secret checks verify 19 public files and all ten desktop/mobile browser cases pass. These checks do not prove store availability: publish this change only after Audivoya 0.2.16 is live in the Chrome Web Store, because the pages state that version is available.
+
 ## Chrome Web Store launch (October 6, 2026)
 
 Verified the publisher's Chrome Web Store URL resolves to the canonical `chromewebstore.google.com` listing for **Audivoya - AI Dubbing & Captions**, returns HTTP 200, and includes an **Add to Chrome** action. Home, setup guide, install section, FAQ, support copy and search metadata now identify version 0.2.15 as available for desktop Chrome and link directly to the listing. Edge remains marked pending until its own Add-ons publication is verified; the site does not imply that the Chrome listing is the Edge store listing. The store settings contain only the verified Chrome URL.
