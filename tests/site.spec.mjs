@@ -25,14 +25,19 @@ test('all public pages render without horizontal overflow, broken images or exte
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     ).toBe(true);
+    for (const img of await page.locator('img').all()) {
+      await img.scrollIntoViewIfNeeded();
+    }
     await page.locator('footer').scrollIntoViewIfNeeded();
     await expect
-      .poll(() =>
-        page
-          .locator('img')
-          .evaluateAll((images) =>
-            images.every((img) => img.complete && img.naturalWidth > 0),
-          ),
+      .poll(
+        () =>
+          page
+            .locator('img')
+            .evaluateAll((images) =>
+              images.every((img) => img.complete && img.naturalWidth > 0),
+            ),
+        { timeout: 10000 },
       )
       .toBe(true);
     await expect(page.locator('form,input')).toHaveCount(0);
