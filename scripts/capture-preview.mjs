@@ -7,21 +7,46 @@ try {
   const page = await browser.newPage({
     viewport: { width: 1440, height: 1000 },
   });
-  await page.goto('http://127.0.0.1:4180' + site.base);
-  await page.screenshot({ path: 'artifacts/home-desktop.png', fullPage: true });
+  async function capture(url, path) {
+    await page.goto(url);
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(300);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(200);
+    await page.screenshot({ path, fullPage: true });
+  }
+
+  await capture(
+    'http://127.0.0.1:4180' + site.base,
+    'artifacts/home-desktop.png',
+  );
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.screenshot({ path: 'artifacts/home-mobile.png', fullPage: true });
+  await capture(
+    'http://127.0.0.1:4180' + site.base,
+    'artifacts/home-mobile.png',
+  );
   await page.setViewportSize({ width: 640, height: 450 });
-  await page.screenshot({
-    path: 'artifacts/home-zoom-equivalent.png',
-    fullPage: true,
-  });
+  await capture(
+    'http://127.0.0.1:4180' + site.base,
+    'artifacts/home-zoom-equivalent.png',
+  );
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto('http://127.0.0.1:4180' + site.base + 'guide/');
-  await page.screenshot({
-    path: 'artifacts/guide-desktop.png',
-    fullPage: true,
-  });
+  await capture(
+    'http://127.0.0.1:4180' + site.base + 'guide/',
+    'artifacts/guide-desktop.png',
+  );
+  await capture(
+    'http://127.0.0.1:4180' + site.base + 'support/',
+    'artifacts/support-desktop.png',
+  );
+  await capture(
+    'http://127.0.0.1:4180' + site.base + 'privacy/',
+    'artifacts/privacy-desktop.png',
+  );
+  await capture(
+    'http://127.0.0.1:4180' + site.base + 'terms/',
+    'artifacts/terms-desktop.png',
+  );
 } finally {
   await browser.close();
 }
