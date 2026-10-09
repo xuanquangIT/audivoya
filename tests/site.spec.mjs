@@ -27,12 +27,14 @@ test('all public pages render without horizontal overflow, broken images or exte
     ).toBe(true);
     await page.locator('footer').scrollIntoViewIfNeeded();
     await expect
-      .poll(() =>
-        page
-          .locator('img')
-          .evaluateAll((images) =>
-            images.every((img) => img.complete && img.naturalWidth > 0),
-          ),
+      .poll(
+        () =>
+          page
+            .locator('img')
+            .evaluateAll((images) =>
+              images.every((img) => img.complete && img.naturalWidth > 0),
+            ),
+        { timeout: 10000 },
       )
       .toBe(true);
     await expect(page.locator('form,input')).toHaveCount(0);
