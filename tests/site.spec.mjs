@@ -25,6 +25,9 @@ test('all public pages render without horizontal overflow, broken images or exte
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     ).toBe(true);
+    for (const img of await page.locator('img').all()) {
+      await img.scrollIntoViewIfNeeded();
+    }
     await page.locator('footer').scrollIntoViewIfNeeded();
     await expect
       .poll(
