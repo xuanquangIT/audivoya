@@ -1,5 +1,11 @@
 # Website validation
 
+## Microsoft Edge Add-ons launch (October 12, 2026)
+
+Verified the publisher's Microsoft Edge Add-ons URL resolves to the canonical `microsoftedge.microsoft.com/addons` listing for **Audivoya - AI Dubbing & Captions** (`ijcfkaioapolmcgmkhgaadhchiakhkeb`), returns HTTP 200, and is publicly available for desktop Edge. Home, setup guide, install section, FAQ, support copy, social sharing card and search metadata now identify version 0.2.16 as available for both desktop Chrome and Microsoft Edge and link directly to both verified listings.
+
+Store pending state is now 0 (both desktop stores live). Local build/link/CSP/secret checks verify 19 public files and all desktop/mobile browser test cases pass.
+
 ## Audivoya 0.2.16 guide refresh (October 7, 2026)
 
 Updated the guide, home page, FAQ, support and privacy copy for 0.2.16: the two Start choices (**Start dubbing** and **Start with sync window**, replacing the settings checkbox), the single Google audio-sharing/fees line with a Privacy & data link, and the **Stop automatically after** options from 5 minutes to 8 hours or Never (default 60 minutes). Never is described with its cost: capture and audio sent to Google continue, and Google API fees may accrue, until Stop, tab close or leaving the website.
