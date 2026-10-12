@@ -50,7 +50,13 @@ test('honest install state, keyboard FAQ and setup navigation work', async ({
   page,
 }) => {
   await page.goto(site.base);
-  await expect(page.locator('.store-pending')).toHaveCount(1);
+  await expect(page.locator('.store-pending')).toHaveCount(0);
+  await expect(
+    page.getByRole('link', { name: 'Install for Chrome' }).first(),
+  ).toHaveAttribute('href', site.stores.chrome);
+  await expect(
+    page.getByRole('link', { name: 'Install for Edge' }).first(),
+  ).toHaveAttribute('href', site.stores.edge);
   await expect(page.locator('.hero-note')).toContainText(
     'Google API fees may apply',
   );

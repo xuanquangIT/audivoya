@@ -1,7 +1,17 @@
 import { chromium } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
+import { spawn } from 'node:child_process';
 import { site } from '../site.config.mjs';
+
 await mkdir('artifacts', { recursive: true });
+let serverProcess;
+try {
+  await fetch('http://127.0.0.1:4180' + site.base);
+} catch {
+  serverProcess = spawn('node', ['scripts/serve.mjs'], { stdio: 'ignore' });
+  await new Promise((resolve) => setTimeout(resolve, 800));
+}
+
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({
@@ -49,4 +59,5 @@ try {
   );
 } finally {
   await browser.close();
+  if (serverProcess) serverProcess.kill();
 }

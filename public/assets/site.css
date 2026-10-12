@@ -150,6 +150,14 @@ nav a[aria-current] {
   padding: 10px 16px;
   gap: 8px;
 }
+.button.secondary {
+  background: transparent;
+  border: 1px solid var(--deep);
+  color: var(--deep);
+}
+.button.secondary:hover {
+  background: rgba(24, 60, 48, 0.08);
+}
 .text-link {
   display: inline-flex;
   align-items: center;
