@@ -1,0 +1,145 @@
+---
+name: site-release-sync
+description: Sync the website with an extension release in two phases. Phase A, before store submission, brings privacy, guide and FAQ copy, the language catalog, guide captures and a validation entry in line with the candidate while version claims stay at the store-live version. Phase B, after the store listing is live, verifies the listing anonymously, then updates extensionVersion, updated, store URLs, social card, tests, README and validation and checks the live site. Use when the extension opens a release/X.Y.Z PR or tags vX.Y.Z, when its privacy text changed, or when a Chrome or Edge listing shows a new version.
+paths: site.config.mjs,src/languages.json,public/assets/guide/**
+argument-hint: '<x.y.z> <A|B>'
+---
+
+# Extension release → website
+
+The extension repo is **read-only** here: read files with `git show`, fetch refs, build its gitignored `dist/`, and nothing else. Never edit, commit, push or switch branches there. All writes happen in one site worktree.
+
+Why two phases: the extension's release PR merge to `main` uploads the Chrome draft and submits Edge for certification, so reviewers and early users read the privacy page **before** the listing goes live (Phase A). Version and availability claims are only true **after** the listing is public (Phase B). Merging either PR deploys the site: use [site-deploy](../site-deploy/SKILL.md) when the request asks to publish (Phase B is normally such a request).
+
+Commands are POSIX shell (Git Bash on Windows), run from the site main checkout or worktree root. Shell variables do not survive between agent tool calls: repeat the §0 block (or inline its values) in each call.
+
+## 0. Variables
+
+```sh
+V=0.2.18                                    # extension version being released
+SITE_MAIN="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")"
+HUB="$(dirname "$SITE_MAIN")"
+EXT="$HUB/Realtime-Dubbing"                 # extension main checkout (read-only)
+LIVE="$(node --input-type=module -e "import { site } from './site.config.mjs'; console.log(site.extensionVersion)")"
+git -C "$EXT" fetch origin --tags           # updates remote-tracking refs only
+EXT_REF="origin/release/$V"                 # release PR head; "v$V" once tagged; "origin/develop" for an early privacy pass
+LIVE_REF="v$LIVE"
+git -C "$EXT" rev-parse --verify "$EXT_REF^{commit}" && git -C "$EXT" rev-parse --verify "$LIVE_REF^{commit}"
+```
+
+`LIVE` must equal what the stores list today (site-deploy §5). If the stores already list a newer version, both phases were skipped for it: run Phase A's parity steps and Phase B's version steps for that version in one `release/site-<x.y.z>-live` PR, privacy first.
+
+## Phase A — before store submission
+
+Trigger: the extension opened `release/X.Y.Z` (dubbing-release), or privacy-relevant code changed on `develop`. Deadline: deployed before the extension release PR merges.
+
+### A1. Worktree
+
+```sh
+node scripts/worktree/wt.mjs new "release/site-$V" --claims src/pages.mjs,src/languages.json,public/assets/guide,docs/VALIDATION.md,README.md --task "Phase A sync for extension $V"
+```
+
+### A2. Inventory what changed since the live version
+
+```sh
+git -C "$EXT" log --oneline "$LIVE_REF..$EXT_REF" -- apps/extension packages docs/PRIVACY.md docs/release
+git -C "$EXT" diff --stat "$LIVE_REF" "$EXT_REF" -- apps/extension/privacy.html docs/PRIVACY.md docs/release/chrome-store/privacy-practices.md docs/release/chrome-store/languages.json apps/extension/vite.config.ts apps/extension/index.html apps/extension/sync.html
+git -C "$EXT" show "$EXT_REF:docs/release/RELEASE-$V.md"
+git -C "$EXT" diff "$LIVE_REF" "$EXT_REF" -- apps/extension/privacy.html docs/PRIVACY.md
+```
+
+Decide per change:
+
+| Extension change                                                                                                                                        | Site action                                                                                                    | Phase           |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | --------------- |
+| Stored data, endpoint, permission, retention or deletion control (`privacy.html`, `docs/PRIVACY.md`, `vite.config.ts` manifest, `privacy-practices.md`) | Update the privacy page; bump its "Last updated"; label version-specific behaviour "Version X.Y.Z and later …" | **A, blocking** |
+| Renamed feature or option (e.g. "Export VTT" → "WebVTT, SRT, or Markdown")                                                                              | `grep -n "<old phrase>" src/pages.mjs README.md`; update guide, FAQ, privacy                                   | A               |
+| New user feature ("Changes for users" in `RELEASE-X.Y.Z.md`)                                                                                            | Optional guide/FAQ text labelled "from version X.Y.Z"; no availability wording                                 | A or B          |
+| Popup or sync-window UI, labels or layout                                                                                                               | Recapture (A4); check the selector contract                                                                    | A               |
+| Language catalog                                                                                                                                        | Copy the JSON (A3)                                                                                             | A               |
+| Version number, "available in", store links, social card                                                                                                | Nothing yet                                                                                                    | **B only**      |
+| Tooling, CI, internal refactors only                                                                                                                    | Nothing: report "no site impact for X.Y.Z" and stop without a PR                                               | —               |
+
+Write copy with [site-content](../site-content/SKILL.md) (claim rules and the privacy parity map). Change the smallest spans in `src/pages.mjs`.
+
+### A3. Language catalog
+
+```sh
+diff <(git -C "$EXT" show "$EXT_REF:docs/release/chrome-store/languages.json") src/languages.json && echo "languages: identical"
+```
+
+If different: `git -C "$EXT" show "$EXT_REF:docs/release/chrome-store/languages.json" > src/languages.json`, then `npx prettier --write src/languages.json`. If `verifiedOn` moved, update the hardcoded "checked <Month D, YYYY>" sentence in the `supportedLanguages` block of `src/pages.mjs`; if the count changed, update the README "Content maintenance" line. Tests read the JSON and need no edit. If the extension changed `packages/core/src/languages.ts` without its JSON, stop and report it to the extension release manager; the site never derives the catalog from TypeScript.
+
+### A4. Captures
+
+Only when the UI changed. Follow [site-capture](../site-capture/SKILL.md) with the extension release worktree (`$HUB/worktrees/ext/release-$V`, clean, HEAD = `$EXT_REF`) or a throwaway detached worktree at `$EXT_REF`. Because captures now show `$V` while the site still claims `$LIVE`, captions must read the version from `capture.json` (site-capture §4).
+
+### A5. Keep version claims unchanged
+
+```sh
+git diff origin/main -- site.config.mjs     # must print nothing in Phase A
+```
+
+`extensionVersion`, `updated`, `stores` and the social card stay as they are until Phase B.
+
+### A6. Record, verify, open the PR
+
+- Prepend to `docs/VALIDATION.md`: `## Audivoya X.Y.Z privacy and guide sync (<Month D, YYYY>)` — what changed for users, extension ref and SHA compared, capture provenance (version, browser, mode) or "captures unchanged", check counts, and: "Version and availability claims stay at <LIVE> until the X.Y.Z listings are verified."
+- `npm run check`; `npm run test:e2e`; `npm run build && node scripts/capture-preview.mjs` and review `privacy-desktop`, `guide-desktop`, `home-*`.
+- Commit `docs(release): sync site with Audivoya X.Y.Z candidate`, push, open the PR (site-ship §5). Deploy section: "Must be live before the extension `release/X.Y.Z` PR merges (store submission). Version claims unchanged."
+
+### A7. Hand off
+
+Tell the extension release manager: site PR URL and deploy state, the captures path for `node scripts/build-store-assets.mjs --captures "<site worktree>/public/assets/guide"`, and anything in the extension that looked inconsistent (privacy text vs. code, catalog drift). Deploy the PR with site-deploy when the request asks to publish, so the privacy page is live before submission.
+
+### Phase A done when
+
+- [ ] Every privacy-relevant extension change since `$LIVE_REF` is disclosed; privacy "Last updated" moved.
+- [ ] Renamed features updated across guide, FAQ, privacy, README.
+- [ ] `src/languages.json` byte-identical to the extension JSON at `$EXT_REF`.
+- [ ] Captures (if any) from a clean `dist/chromium` at `$EXT_REF`, reviewed, sizes and captions correct.
+- [ ] `site.config.mjs` untouched; validation entry prepended; check and e2e green; PR open with the deadline stated.
+
+## Phase B — after the listing is live
+
+Trigger: the extension release manager reports the store listing public, or site-deploy §5 shows `$V` on a listing.
+
+### B1. Verify every linked listing
+
+Run site-deploy §5. Decide:
+
+| Result                                                  | Do                                                                               |
+| ------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| Every store in `site.stores` returns 200 and lists `$V` | Continue                                                                         |
+| One store lists `$V`, another still lists `$LIVE`       | Stop: `extensionVersion` is one claim for all stores. Report and re-check later  |
+| Version "not shown" after a retry                       | Stop: unverified; ask the extension release manager for the public listing state |
+| Final URL changed (new slug)                            | Use the final canonical URL in `site.stores`                                     |
+| A new store went public (first listing)                 | Add it to `site.stores`, update install copy, tests and the social card (B3)     |
+
+### B2. Worktree and data
+
+```sh
+node scripts/worktree/wt.mjs new "release/site-$V-live" --claims site.config.mjs,src/pages.mjs,docs/VALIDATION.md,README.md,tests/site.spec.mjs --task "Phase B: Audivoya $V live"
+```
+
+In `site.config.mjs` set `extensionVersion: '<V>'`, `updated: '<today YYYY-MM-DD>'` (sitemap lastmod) and store URLs from B1. Turn Phase A wording such as "from version X.Y.Z" or "Version X.Y.Z and later" into present tense where every live store now runs it: `grep -n -F "$V" src/pages.mjs`.
+
+### B3. Availability artefacts
+
+- Social card: only when the set of stores or the availability line changed. Edit the text in `scripts/generate-social-card.mjs`, run `node scripts/generate-social-card.mjs` from the repo root (Windows keeps its Segoe UI/Georgia typography), review `public/assets/social-card.png`.
+- `tests/site.spec.mjs`: update only when availability changed (`.store-pending` count, `Install for <store>` links); expectations keep reading `site.stores`.
+- README: "Content maintenance" and availability sentences.
+- Prepend to `docs/VALIDATION.md`: `## Audivoya X.Y.Z live in Chrome Web Store and Microsoft Edge Add-ons (<Month D, YYYY>)` with each listing's final URL, HTTP status and listed version from B1, and the check counts.
+
+### B4. Verify, PR, deploy
+
+- `npm run check`; `npm run test:e2e`; capture-preview review of `home-*` and `guide-desktop`.
+- Commit `docs(release): announce Audivoya X.Y.Z in the Chrome and Edge stores`; PR body Evidence includes the store-listing JSON lines.
+- Deploy with site-deploy (merge, Pages watch, `verify-live.mjs`, PR comment).
+
+### Phase B done when
+
+- [ ] Every linked listing verified anonymously at `$V` before any version text changed.
+- [ ] `extensionVersion`, `updated`, store URLs set; transitional wording removed.
+- [ ] Social card, tests and README match the availability actually verified.
+- [ ] Validation entry prepended; check and e2e green; deployed and `verify-live.mjs` passed (or the PR waits with "ready to deploy").

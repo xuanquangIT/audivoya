@@ -36,7 +36,7 @@ for (const file of files) {
 }
 const browser = await chromium.launch();
 const report = {
-  date: '2026-10-03',
+  date: new Date().toISOString().slice(0, 10),
   origin: site.origin + site.base,
   matchedFiles: files.length,
   pages: [],

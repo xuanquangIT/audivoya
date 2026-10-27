@@ -1,0 +1,79 @@
+---
+name: site-deps
+description: Triage Dependabot and upgrade site tooling. Batches npm and GitHub Actions updates, keeps @playwright/test and Prettier aligned with the extension repo, refreshes action SHA pins and the gitleaks version and checksum, and runs the full gate. Use for Dependabot PRs, npm audit findings, Playwright or Prettier upgrades, Node version changes, or action pin updates in .github/workflows.
+paths: package.json,package-lock.json,.nvmrc,.github/dependabot.yml,.github/workflows/**
+argument-hint: '[dependabot PR numbers]'
+---
+
+# Dependency and pin steward
+
+The site ships no npm code: `dependencies` is empty and must stay empty. Dev tooling is exact-pinned (`@playwright/test`, `prettier`), actions are pinned by commit SHA, gitleaks by version and SHA-256. Triage, batching, closing superseded PRs and preparing a green batch PR are autonomous; merging it deploys the site (site-deploy, Deploy class).
+
+## 1. Inventory
+
+```sh
+gh pr list --author app/dependabot --state open --json number,title,headRefName,mergeStateStatus
+SITE_MAIN="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")"
+EXT="$(dirname "$SITE_MAIN")/Realtime-Dubbing"
+git -C "$EXT" fetch origin
+git -C "$EXT" show origin/develop:package.json | node -e "const e=JSON.parse(require('node:fs').readFileSync(0,'utf8')).devDependencies;const s=require('./package.json').devDependencies;for(const n of ['@playwright/test','prettier'])console.log(n,'site',s[n],'ext',e[n])"
+grep -n "uses:" .github/workflows/*.yml
+git -C "$EXT" grep -h "uses:" origin/develop -- .github/workflows | sort -u
+cat .nvmrc; git -C "$EXT" show origin/develop:./.nvmrc   # "./" stops Git Bash rewriting ":.nvmrc"
+```
+
+## 2. Decide
+
+| Update                                  | Policy                                                                                                                                                                                                                                                                               |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `@playwright/test`                      | Same exact version as the extension's `origin/develop` (shared browser revisions; `capture-guide.mjs` needs the CDP `Extensions.triggerAction` the extension tests with). Never move ahead alone: the extension also pins its CI image digest, so upgrade there first (dubbing-deps) |
+| `prettier`                              | Same exact version as the extension; reformat in the same PR                                                                                                                                                                                                                         |
+| GitHub Actions                          | Full 40-character SHA plus `# vX.Y.Z` comment; reuse the SHA the extension already pins for the same action and version; update `pages.yml` and `copilot-setup-steps.yml` together                                                                                                   |
+| gitleaks (`pages.yml`)                  | Bump the download URL version and its SHA-256 line together                                                                                                                                                                                                                          |
+| Node (`.nvmrc`, `engines`)              | Same major as the extension; a major change is its own PR                                                                                                                                                                                                                            |
+| New package                             | Avoid. A new devDependency needs a stated reason, exact pin, license check (`npm view <pkg> license`) and `npm audit`; never a runtime dependency                                                                                                                                    |
+| Major versions                          | One PR each; read the changelog; note breaking changes in the PR                                                                                                                                                                                                                     |
+| Dependabot PR already aligned and green | Keep it as is; it is deployable like any PR                                                                                                                                                                                                                                          |
+
+## 3. Batch in one worktree
+
+```sh
+node scripts/worktree/wt.mjs new deps/tooling-<yyyy-mm> --claims package.json,package-lock.json,.github/workflows,.nvmrc
+npm install --save-dev --save-exact @playwright/test@<version> prettier@<version>
+npx playwright install chromium
+npm run format                                   # only after a Prettier bump
+gh api repos/actions/setup-node/commits/v<x.y.z> --jq .sha       # tag → commit SHA for a pin
+curl -fsSL "https://github.com/gitleaks/gitleaks/releases/download/v<ver>/gitleaks_<ver>_checksums.txt" | grep linux_x64.tar.gz
+```
+
+Edit pins by hand: `uses: actions/setup-node@<sha> # v<x.y.z>`. Keep `permissions`, `persist-credentials: false` and job names unchanged (`verify` is the required check).
+
+Single Dependabot PR that only needs a rebase: `gh pr comment <n> --body "@dependabot rebase"`.
+
+## 4. Verify
+
+```sh
+npm ci --ignore-scripts          # lockfile is consistent
+npm run check
+npm audit --audit-level=high
+npm run test:e2e
+npm test                         # platform script tests
+```
+
+After a Playwright bump, also run a capture smoke test when an extension `dist/chromium` is at hand (site-capture §2, output discarded with `git checkout -- public/assets/guide`); otherwise write NOT RUN for "capture smoke".
+
+## 5. PR and close superseded PRs
+
+- Commit and title: `build(deps): bump Playwright to <x> and Prettier to <y>` (or `ci: refresh action pins`). Body: version table (old → new, extension version), superseded PR numbers, evidence.
+- List the superseded Dependabot PRs in the batch PR body, but leave them open until the batch merges: closing a Dependabot PR mutes that version. After the merge Dependabot closes covered PRs on its next run; close leftovers with `gh pr close <n> --comment "Superseded by #<batch>."`.
+- A Dependabot PR that is out of line with the extension (for example Playwright ahead of it): comment why and close it; Dependabot offers the next version later.
+- Deploy through site-deploy when the request asks to merge or ship.
+
+`.github/dependabot.yml` stays weekly, `open-pull-requests-limit: 3`, npm and github-actions, target `main`. A `groups:` entry for github-actions may cut noise; do not group Playwright with unrelated packages.
+
+## Done when
+
+- [ ] Every open Dependabot PR is merged, superseded and closed, or left open with a reason.
+- [ ] `@playwright/test` and `prettier` equal the extension's `origin/develop` versions (or the gap is explained).
+- [ ] Action pins are full SHAs with matching version comments; gitleaks version and checksum agree.
+- [ ] `npm ci`, `npm run check`, `npm audit --audit-level=high`, `npm run test:e2e`, `npm test` pass; capture smoke run or NOT RUN.

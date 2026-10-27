@@ -10,9 +10,13 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "dev": "node scripts/serve.mjs",
-    "check": "npm run build && node scripts/check.mjs && prettier --check .",
+    "check": "npm run build && node scripts/check.mjs && prettier --check . && npm run agents:check",
     "test:e2e": "playwright test",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test": "node --test scripts/agents/*.test.mjs scripts/agents/hooks/*.test.mjs scripts/worktree/*.test.mjs",
+    "agents:sync": "node scripts/agents/sync.mjs",
+    "agents:check": "node scripts/agents/sync.mjs --check",
+    "wt": "node scripts/worktree/wt.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",

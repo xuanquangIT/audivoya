@@ -1,0 +1,6 @@
+interface:
+  display_name: 'Capture Guide Screenshots'
+  short_description: 'Recapture guide images from a real extension build and review them'
+  default_prompt: 'Use $site-capture to recapture the guide screenshots from the extension build.'
+policy:
+  allow_implicit_invocation: true

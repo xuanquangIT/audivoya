@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(npm ci *)",
+      "Bash(npm test *)",
+      "Bash(npx prettier *)",
+      "Bash(npx playwright *)",
+      "Bash(node scripts/*)",
+      "Bash(node --test *)",
+      "Bash(git *)",
+      "Bash(gh pr *)",
+      "Bash(gh run *)",
+      "Bash(gh issue *)",
+      "Bash(gh api *)",
+      "Bash(gh release view *)",
+      "Edit",
+      "Write"
+    ],
+    "ask": [
+      "Bash(gh workflow run *)",
+      "Bash(gh release create *)",
+      "Bash(gh release delete *)",
+      "Bash(git push --force *)",
+      "Bash(git tag -d *)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./**/.env)",
+      "Read(./.env.local)",
+      "Read(./**/*credential*.txt)",
+      "Read(./**/realtimedubbing-*.json)",
+      "Read(./**/*service-account*.json)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/agents/hooks/session-start.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/agents/hooks/guard-bash.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/agents/hooks/format-on-edit.mjs\"",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
