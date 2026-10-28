@@ -11,7 +11,7 @@ import {
 import { runTool } from './exec.mjs';
 import { dirtyCount, firstLine, git, runGit } from './git.mjs';
 import { isProtectedBranch } from './names.mjs';
-import { isInside } from './paths.mjs';
+import { isInside, samePath } from './paths.mjs';
 
 const BUSY =
   /EBUSY|busy|Permission denied|being used by another process|Invalid argument|Directory not empty|failed to delete|unable to (?:remove|unlink)/i;
@@ -65,9 +65,21 @@ function removeWorktree(ctx, worktree, { force, deleteBranch }) {
     if (force && worktree.locked) args.push('--force');
     args.push(worktree.path);
     const result = runGit(args, { cwd: ctx.mainRoot });
-    if (!result.ok && !finishRemoval(worktree.path, result.stderr))
-      throw new Error(removalFailureMessage(worktree.path, result.stderr));
-    if (!result.ok) git(['worktree', 'prune'], { cwd: ctx.mainRoot });
+    if (!result.ok) {
+      const finished = finishRemoval(worktree.path, result.stderr);
+      git(['worktree', 'prune'], { cwd: ctx.mainRoot });
+      const registered = collectWorktrees(ctx).some((w) =>
+        samePath(w.path, worktree.path),
+      );
+      if (registered)
+        throw new Error(removalFailureMessage(worktree.path, result.stderr));
+      // Git already dropped the worktree; only an empty folder is locked (an editor or file
+      // watcher holds it). Keep going so --delete-branch still runs.
+      if (!finished)
+        console.log(
+          `warning: ${worktree.path} could not be deleted (in use); git no longer tracks it, delete the folder once the lock is gone`,
+        );
+    }
     console.log(`removed worktree ${worktree.path}`);
   }
   if (!deleteBranch || !worktree.branch) return;
