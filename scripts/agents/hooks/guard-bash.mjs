@@ -214,6 +214,11 @@ function classifyLine(line, ctx, depth) {
     const verdict = classifyWords(words, ctx, depth);
     if (verdict.block) return verdict;
   }
+  // Command substitution inside double quotes stays one word above, so classify its body too.
+  for (const match of line.matchAll(/\$\(([^()]*)\)/g)) {
+    const verdict = classifyLine(match[1], ctx, depth + 1);
+    if (verdict.block) return verdict;
+  }
   return ALLOW;
 }
 

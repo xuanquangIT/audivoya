@@ -12,7 +12,9 @@ const SEPARATORS = new Set([';', '&', '|', '(', ')', '`', '\n', '\r']);
  * Command separators outside quotes: `;`, `&`, `&&`, `|`, `||`, `(`, `)`,
  * backticks and newlines, so `$(cmd)` and PowerShell's `& cmd` yield `cmd` as
  * its own command. Input redirection `<` is emitted as a separate `<` word.
- * Inside double quotes, `\"` and `` `" `` are escaped quotes.
+ * Inside double quotes, `\"` and `` `" `` are escaped quotes. A word-initial `#` starts a
+ * comment that runs to the end of the line. A standalone `{` or `}` (PowerShell script
+ * blocks, shell groups) also separates commands.
  * @param {string} line
  * @returns {string[][]}
  */
@@ -52,6 +54,13 @@ export function splitCommands(line) {
     if (ch === "'" || ch === '"') {
       quote = ch;
       inWord = true;
+    } else if (ch === '#' && !inWord) {
+      while (i + 1 < line.length && line[i + 1] !== '\n') i += 1;
+    } else if (
+      (ch === '{' && !inWord && /^\s/.test(line[i + 1] ?? ' ')) ||
+      (ch === '}' && !inWord && /^[\s;&|)]/.test(line[i + 1] ?? ' '))
+    ) {
+      endCommand();
     } else if (SEPARATORS.has(ch)) {
       endCommand();
     } else if (ch === '<') {

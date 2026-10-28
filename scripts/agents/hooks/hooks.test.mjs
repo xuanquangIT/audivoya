@@ -131,6 +131,10 @@ function createHub(t) {
 // --- guard-bash ------------------------------------------------------------
 
 const ALLOWED = [
+  'cat README.md # not .env',
+  'ls # see .env.example',
+  'echo "${#PATH} ok"',
+  'echo "$(date)"',
   'gh api repos/x/y/pulls --jq .[0].number',
   'gh api -X GET repos/x/y/branches/develop/protection',
   'gh api repos/x/y/issues/3/comments -f body=done',
@@ -202,6 +206,9 @@ const BLOCKED = [
   'grep GEMINI .env',
   'grep -e KEY .env',
   'rg KEY .env',
+  'echo "$(<.env)"',
+  'echo "$(cat .env)"',
+  'ForEach-Object { Get-Content .env }',
   'grep -rn KEY --include=.env .',
   'rg -g .env KEY',
   'rg --glob=.env KEY',
