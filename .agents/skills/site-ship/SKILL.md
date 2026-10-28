@@ -1,0 +1,161 @@
+---
+name: site-ship
+description: Ship one website change from worktree to a green PR into main. Covers editing, npm run check, Playwright desktop and mobile, screenshot review, Conventional Commits, the CI watch and the strict rebase loop. Use for any Landing-Page task (copy, styles, scripts, tests, CI, docs) when asked to implement, fix, open a PR or ship; the merge goes through site-deploy because every merge to main publishes GitHub Pages.
+argument-hint: '<task description or PR number>'
+---
+
+# Ship a website change
+
+One task = one worktree = one branch = one PR into `main`. Merging deploys production, so this skill ends at a green, mergeable PR. When the request asks to deploy, publish or release, continue with [site-deploy](../site-deploy/SKILL.md) (Deploy class, AGENTS.md → Autonomy policy).
+
+Commands are POSIX shell (Git Bash on Windows), run from the worktree root.
+
+## 1. Start in a worktree
+
+| Situation                                                          | Do                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Main checkout (SessionStart says so, or `wt list` marks it)        | `node scripts/worktree/wt.mjs new <type>/<slug> --claims <paths> --task "<one line>"`, then work in the printed directory                                                                                                                                                                                                                                          |
+| Worktree made by Claude, Codex or Cursor                           | `node scripts/worktree/setup.mjs`, then `git branch -m <type>/<slug>` (or `git switch -c <type>/<slug>` when detached)                                                                                                                                                                                                                                             |
+| Continuing an open PR                                              | Find its worktree with `node scripts/worktree/wt.mjs list`. None: from the main checkout run `git fetch origin && git worktree add ../worktrees/site/<type>-<slug> <type>/<slug>` (git reuses the local branch or creates it from `origin/<type>/<slug>`), then `cd` there and run `node scripts/worktree/setup.mjs`. `wt new` refuses branches that already exist |
+| `node scripts/worktree/wt.mjs claims` exits 1 after you add claims | Another worktree edits the same hot file. Narrow your edit, or let the other PR merge first and rebase                                                                                                                                                                                                                                                             |
+
+Pick the branch and commit type from the change:
+
+| Change                                                  | Branch                                                   | Commit subject example                                     |
+| ------------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------- |
+| Copy in guide, privacy, support, terms, FAQ             | `docs/<slug>`                                            | `docs(privacy): disclose per-site caption preferences`     |
+| New section, layout, styles, progressive-enhancement JS | `feat/<slug>`                                            | `feat(pages): add keyboard shortcut table to the guide`    |
+| Broken link, overflow, script or test bug               | `fix/<slug>`                                             | `fix(pages): stop guide images overflowing at 320 px`      |
+| Extension release sync (see site-release-sync)          | `release/site-<x.y.z>`, then `release/site-<x.y.z>-live` | `docs(release): sync site with Audivoya 0.2.18 candidate`  |
+| Dependencies and action pins (see site-deps)            | `deps/<slug>`                                            | `build(deps): bump Playwright to 1.64.0`                   |
+| CI, tests, agent config, worktree tooling               | `ci/`, `test/`, `chore/`                                 | `ci: pin upload-pages-artifact by SHA`, `chore(agents): …` |
+
+Claim every hot file you will touch: `src/pages.mjs`, `site.config.mjs`, `public/assets/site.css`, `docs/VALIDATION.md`, `public/assets/guide`.
+
+## 2. Implement
+
+- Read the rule for the files you edit: `.agents/rules/{pages,scripts,tests,ci,docs,agent-config}.md`.
+- `src/pages.mjs` holds long single-line templates: change the smallest span, never reflow unrelated text.
+- Copy that states behaviour, limits, privacy or availability: run [site-content](../site-content/SKILL.md) before committing.
+- Keep facts data-driven: `site.extensionVersion`, `site.stores.*`, `languageCatalog.languages.length`; never type a version, count or store URL into copy or tests.
+- A user-visible copy change that breaks a test locator: update the test in the same commit; never weaken or delete the assertion.
+
+## 3. Verify locally
+
+| You changed                                                                                                             | Run                                                                                    | Evidence tier                 |
+| ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------- |
+| Anything                                                                                                                | `npm run check`                                                                        | Static/build                  |
+| `src/**`, `public/**`, `site.config.mjs`, `scripts/build.mjs`, `scripts/serve.mjs`, `tests/**`, `playwright.config.mjs` | `npm run test:e2e` (first run in a worktree: `npx playwright install chromium`)        | Browser UI (desktop + mobile) |
+| Anything visible (copy length, layout, CSS, images)                                                                     | `npm run build && node scripts/capture-preview.mjs`, then open every `artifacts/*.png` | Screenshot review             |
+| `public/assets/guide/*`                                                                                                 | [site-capture](../site-capture/SKILL.md)                                               | Installed-extension capture   |
+| Only `docs/**`, `README.md`, `.github/**`, agent config                                                                 | `npm run check`; CI runs e2e                                                           | —                             |
+
+Notes:
+
+- Ports are per worktree (`node scripts/worktree/ports.mjs --env`). Locally Playwright reuses a server already listening on `SITE_PORT` without rebuilding; if your own `npm run dev` is running, `npm run build` first.
+- `capture-preview.mjs` serves whatever `dist/` holds; build first. It writes `home-desktop`, `home-mobile`, `home-zoom-equivalent`, `guide-desktop`, `support-desktop`, `privacy-desktop`, `terms-desktop`. Look for clipped text, overlaps, horizontal scroll, missing images, broken header/footer, unreadable contrast.
+- Public build changed (pages, assets, `site.config.mjs`)? Prepend a `docs/VALIDATION.md` entry (format: `.agents/rules/docs.md`) with the real counts: `npm run check` prints `Verified <N> public files`; e2e is 5 tests × 2 projects.
+
+## 4. Commit
+
+Conventional Commits, imperative subject ≤ 72 characters. Body: the user-visible outcome, then the evidence tiers you ran.
+
+```sh
+git status --short
+git add <paths>
+git commit -m "docs(guide): explain per-site caption position" \
+  -m "The guide now explains that caption position and size are remembered per website." \
+  -m "Validation: npm run check (19 public files); test:e2e 10/10; capture-preview reviewed guide and home."
+```
+
+Feature PRs never change `site.extensionVersion` or `site.stores` — that is Phase B of site-release-sync.
+
+## 5. Push and open the PR
+
+```sh
+git push -u origin HEAD
+gh pr create --base main --title "<commit subject>" --body-file <body.md>
+```
+
+PR body (write it to a file outside the repo or pass `--body "$(cat <<'EOF' … EOF)"`):
+
+```markdown
+## Summary
+
+- <user-visible outcome>
+
+## Extension reference
+
+None. | Audivoya <x.y.z> at `<ref>` (`<sha>`); compared <files>.
+
+## Evidence
+
+| Tier                                                      | Result                     |
+| --------------------------------------------------------- | -------------------------- |
+| Static/build — `npm run check`                            | PASS, <N> public files     |
+| Browser UI — `npm run test:e2e` (desktop + mobile)        | PASS, <passed>/<total>     |
+| Screenshot review — `scripts/capture-preview.mjs`         | Reviewed <pages> / NOT RUN |
+| Installed-extension capture — `scripts/capture-guide.mjs` | NOT RUN                    |
+| Store listing — anonymous check                           | NOT RUN                    |
+| Live site — `scripts/verify-live.mjs`                     | After deploy               |
+
+## Deploy
+
+Merging deploys https://xuanquangit.github.io/audivoya/. <Ordering constraint, or "No ordering constraint.">
+```
+
+## 6. Watch CI
+
+```sh
+gh pr checks --watch --fail-fast
+gh run view <run-id> --log-failed        # run id from gh pr checks or gh run list --branch <branch>
+```
+
+| Failure                                                                      | Cause                                                                             | Fix                                                                                                                                               |
+| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Scan history and public artifact for secrets` (gitleaks)                    | Credential-like value in history or `dist/`                                       | Remove it. A real credential: stop and tell the user (rotation is theirs). Never add an allowlist entry                                           |
+| `Broken deployment base`, `Missing local anchor`, `Missing target anchor`    | Link not built with `url()` or anchor id missing                                  | Use `url('<route>')` / fix the `id`                                                                                                               |
+| `Unverified product claim`                                                   | Banned phrase                                                                     | Reword (site-content)                                                                                                                             |
+| `Unexpected executable or input surface`                                     | `<form>`, `<input>`, `<iframe>`, inline `<script>`, `on*=`                        | Remove; behaviour belongs in `public/assets/site.js`                                                                                              |
+| `Missing CSP`, `Unexpected network/form policy`                              | Page bypassed the `scripts/build.mjs` head or CSP edited                          | Restore the shared head and policy                                                                                                                |
+| `Duplicate HTML ID`, `Unexpectedly large asset`, `Forbidden deployment file` | Copy-pasted section, file ≥ 3 MB, `.env`/`.map`/`.zip`/`.pem`/`.key` in `public/` | Rename the id, compress or crop, remove the file                                                                                                  |
+| `Retired public product brand`                                               | "Realtime Dubbing" in output                                                      | Use Audivoya                                                                                                                                      |
+| `prettier --check`                                                           | Unformatted file                                                                  | `npx prettier --write <files>`                                                                                                                    |
+| `npm audit --audit-level=high`                                               | Vulnerable dev dependency                                                         | [site-deps](../site-deps/SKILL.md)                                                                                                                |
+| Playwright test                                                              | Real regression or intentional copy change                                        | `npx playwright test --project=mobile -g "<title>"`; `npx playwright show-trace test-results/<dir>/trace.zip`; fix the code or update the locator |
+| Passed only on retry                                                         | Flaky wait or locator                                                             | Treat as a failure and fix it                                                                                                                     |
+
+## 7. Keep it mergeable (strict, linear)
+
+`main` requires `verify` on the latest `main`. When `gh pr view --json mergeStateStatus` says `BEHIND` or `DIRTY`:
+
+```sh
+git fetch origin
+git rebase origin/main
+npm run check
+git push --force-with-lease
+gh pr checks --watch --fail-fast
+```
+
+| Conflict in                               | Resolve                                                                                                      |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `docs/VALIDATION.md`                      | Keep both entries, newest first; yours on top when dates tie                                                 |
+| `src/pages.mjs`, `public/assets/site.css` | Re-apply your change onto main's version of the line; never take a side wholesale                            |
+| `public/assets/guide/*`, `capture.json`   | Binary: during a rebase `git checkout --ours <file>` takes main's copy; then recapture on top (site-capture) |
+| `site.config.mjs`                         | Keep main's values unless your PR is the Phase B release sync                                                |
+
+`rerere.enabled` (set by `wt init`) replays resolutions on the next rebase.
+
+## 8. Hand off
+
+- Deploy requested: [site-deploy](../site-deploy/SKILL.md) with the PR number.
+- Not requested: stop and report the PR URL, evidence table and "ready to deploy".
+- After a merge: `node scripts/worktree/wt.mjs prune --merged` from the main checkout.
+
+## Done when
+
+- [ ] Work happened in a site worktree on `<type>/<slug>`, claims recorded, no unacknowledged overlap.
+- [ ] `npm run check` passes; e2e ran when the table requires it; screenshots reviewed for visible changes.
+- [ ] Tests, `docs/VALIDATION.md` and README updated together with the facts they assert.
+- [ ] Conventional Commit; PR to `main` with Summary, Extension reference, Evidence (NOT RUN where not run) and Deploy sections.
+- [ ] `verify` green on a branch that is up to date with `main`.

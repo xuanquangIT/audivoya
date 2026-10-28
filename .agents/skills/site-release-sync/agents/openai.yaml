@@ -1,0 +1,6 @@
+interface:
+  display_name: 'Site Release Sync'
+  short_description: 'Two-phase website sync for an extension release (privacy first, version later)'
+  default_prompt: 'Use $site-release-sync to run Phase A for the extension release candidate.'
+policy:
+  allow_implicit_invocation: true

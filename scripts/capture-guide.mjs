@@ -4,6 +4,8 @@ import { createServer } from 'node:http';
 import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { port } from './worktree/ports.mjs';
 
 const extension = process.argv[2];
 if (!extension) throw new Error('Pass the extension dist/chromium directory.');
@@ -55,10 +57,28 @@ const video = document.getElementById('demo');
 video.srcObject = stream;
 video.play().catch(() => {});
 </script></body></html>`;
+// Main checkout and CI: 4181. Linked worktrees get their own slot port; an
+// explicit SITE_CAPTURE_PORT always wins (see .agents/workspace.json).
+const capturePort = port('SITE_CAPTURE_PORT', {
+  cwd: fileURLToPath(new URL('../', import.meta.url)),
+});
+const sourceUrl = `http://127.0.0.1:${capturePort}/`;
 const server = createServer((_request, response) => {
   response.writeHead(200, { 'Content-Type': 'text/html' });
   response.end(demoPage);
-}).listen(4181, '127.0.0.1');
+});
+await new Promise((resolve, reject) => {
+  server.once('error', (error) =>
+    reject(
+      error.code === 'EADDRINUSE'
+        ? new Error(
+            `Port ${capturePort} is already in use. Stop the other capture or set SITE_CAPTURE_PORT.`,
+          )
+        : error,
+    ),
+  );
+  server.listen(capturePort, '127.0.0.1', resolve);
+});
 const profile = await mkdtemp(path.join(tmpdir(), 'rd-site-capture-'));
 const context = await chromium.launchPersistentContext(profile, {
   channel: 'chromium',
@@ -76,7 +96,7 @@ try {
     context.serviceWorkers()[0] ??
     (await context.waitForEvent('serviceworker'));
   const source = await context.newPage();
-  await source.goto('http://127.0.0.1:4181/');
+  await source.goto(sourceUrl);
   await source.bringToFront();
   const session = await context.browser().newBrowserCDPSession();
   const id = new URL(worker.url()).hostname;

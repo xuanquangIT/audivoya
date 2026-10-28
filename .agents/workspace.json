@@ -1,0 +1,32 @@
+{
+  "repo": "site",
+  "baseBranch": "main",
+  "protectedBranches": ["main"],
+  "worktreeRoot": "../worktrees/site",
+  "copyFromMain": [".env"],
+  "install": [
+    "npm",
+    "ci",
+    "--ignore-scripts",
+    "--prefer-offline",
+    "--no-audit",
+    "--no-fund"
+  ],
+  "ports": {
+    "slotBase": 26000,
+    "maxSlots": 49,
+    "names": {
+      "SITE_PORT": {
+        "legacy": 4180,
+        "offset": 80
+      },
+      "SITE_CAPTURE_PORT": {
+        "legacy": 4181,
+        "offset": 81
+      }
+    }
+  },
+  "locks": {
+    "capture": "Machine-wide lock for installed-extension capture (scripts/capture-guide.mjs; shared with the extension e2e suite and probes)"
+  }
+}

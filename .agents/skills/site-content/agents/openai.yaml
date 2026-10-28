@@ -1,0 +1,6 @@
+interface:
+  display_name: 'Site Claims and Privacy Review'
+  short_description: 'Check copy against banned claims and the extension privacy text'
+  default_prompt: 'Use $site-content to review this website copy for claims and privacy parity.'
+policy:
+  allow_implicit_invocation: true

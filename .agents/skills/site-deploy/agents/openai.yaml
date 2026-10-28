@@ -1,0 +1,6 @@
+interface:
+  display_name: 'Deploy the Website'
+  short_description: 'Merge to main, watch Pages, verify live and check store listings'
+  default_prompt: 'Use $site-deploy to merge this green site PR, watch the Pages deploy and verify the live site.'
+policy:
+  allow_implicit_invocation: true

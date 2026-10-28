@@ -9,3 +9,9 @@ playwright-report/
 *.pem
 *.key
 .DS_Store
+# Per-worktree state and harness-local files (see .agents/workspace.json)
+.worktree.json
+.claude/worktrees/
+.worktrees/
+.claude/settings.local.json
+CLAUDE.local.md

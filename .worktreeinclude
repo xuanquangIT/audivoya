@@ -1,0 +1,3 @@
+# Gitignored files Claude Code and the Codex app copy into new worktrees.
+# Keep in sync with "copyFromMain" in .agents/workspace.json.
+.env

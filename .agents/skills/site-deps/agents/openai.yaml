@@ -1,0 +1,6 @@
+interface:
+  display_name: 'Site Dependencies'
+  short_description: 'Batch Dependabot updates, align Playwright/Prettier, refresh SHA pins'
+  default_prompt: 'Use $site-deps to triage the open Dependabot PRs and prepare one green batch PR.'
+policy:
+  allow_implicit_invocation: true

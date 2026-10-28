@@ -4,12 +4,14 @@ import languageCatalog from '../src/languages.json' with { type: 'json' };
 
 test('all public pages render without horizontal overflow, broken images or external requests', async ({
   page,
+  baseURL,
 }) => {
   const external = [];
   const failures = [];
+  // The preview port differs per worktree; anything off this origin is external.
+  const localOrigin = new URL(baseURL).origin + '/';
   page.on('request', (request) => {
-    if (!request.url().startsWith('http://127.0.0.1:4180/'))
-      external.push(request.url());
+    if (!request.url().startsWith(localOrigin)) external.push(request.url());
   });
   page.on('pageerror', (error) => failures.push(error.message));
   for (const route of ['', 'guide/', 'privacy/', 'support/', 'terms/']) {

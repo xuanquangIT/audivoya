@@ -3,8 +3,13 @@ import { readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { site } from '../site.config.mjs';
+import { port } from './worktree/ports.mjs';
 
+const projectRoot = fileURLToPath(new URL('../', import.meta.url));
 const root = path.resolve(fileURLToPath(new URL('../dist/', import.meta.url)));
+// Main checkout and CI: 4180. Linked worktrees get their own slot port; an
+// explicit SITE_PORT always wins (see .agents/workspace.json).
+const listenPort = port('SITE_PORT', { cwd: projectRoot });
 const types = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -38,6 +43,15 @@ createServer(async (request, response) => {
     response.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
     response.end('Not found');
   }
-}).listen(4180, '127.0.0.1', () =>
-  console.log('Preview: http://127.0.0.1:4180' + site.base),
-);
+})
+  .on('error', (error) => {
+    console.error(
+      error.code === 'EADDRINUSE'
+        ? `Port ${listenPort} is already in use. Stop the other preview server or set SITE_PORT.`
+        : `Preview server failed: ${error.message}`,
+    );
+    process.exit(1);
+  })
+  .listen(listenPort, '127.0.0.1', () =>
+    console.log(`Preview: http://127.0.0.1:${listenPort}${site.base}`),
+  );

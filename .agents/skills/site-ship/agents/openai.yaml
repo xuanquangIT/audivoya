@@ -1,0 +1,6 @@
+interface:
+  display_name: 'Ship a Site Change'
+  short_description: 'Worktree, check, e2e, Conventional Commit and a green PR to main'
+  default_prompt: 'Use $site-ship to implement this website change and open a green PR to main.'
+policy:
+  allow_implicit_invocation: true

@@ -24,6 +24,30 @@ node scripts/verify-live.mjs
 
 Open http://127.0.0.1:4180/audivoya/. The preview uses the real deployment base so path failures are visible locally.
 
+## Parallel worktrees & ports
+
+One task = one worktree = one branch = one PR. Keep this main checkout on `main` for integration and review, and do task work in a linked worktree:
+
+```sh
+node scripts/worktree/wt.mjs new docs/refresh-guide --claims src/pages.mjs,docs/VALIDATION.md
+node scripts/worktree/wt.mjs list
+node scripts/worktree/wt.mjs claims
+node scripts/worktree/wt.mjs rm docs/refresh-guide --delete-branch
+```
+
+`new` fetches, branches from `origin/main` into `../worktrees/site/docs-refresh-guide`, copies `.env` when the main checkout has one, runs `npm ci --ignore-scripts` and records the slot in the gitignored `.worktree.json`. `claims` exits 1 when two worktrees claim the same path; claim the merge hotspots (`src/pages.mjs`, `site.config.mjs`, `public/assets/site.css`, `docs/VALIDATION.md`) whenever a task edits them. Worktrees created by Claude Code, Codex or Cursor bootstrap themselves with `node scripts/worktree/setup.mjs` (via `.worktreeinclude` and `.cursor/worktrees.json`).
+
+Ports are defined in `.agents/workspace.json`:
+
+| Checkout                      | `SITE_PORT` (`npm run dev`, Playwright, `capture-preview`) | `SITE_CAPTURE_PORT` (`capture-guide`) |
+| ----------------------------- | ---------------------------------------------------------- | ------------------------------------- |
+| Main checkout and CI (slot 0) | 4180                                                       | 4181                                  |
+| Worktree slot N (1-49)        | 26000 + 100 × N + 80 (slot 1: 26180)                       | 26000 + 100 × N + 81 (slot 1: 26181)  |
+
+An explicitly set variable always wins, for example `SITE_PORT=4300 npm run dev`. `node scripts/worktree/ports.mjs` prints the ports of the current checkout. Because every worktree has its own port, local Playwright runs can safely reuse an already running preview (`reuseExistingServer` is off on CI) without testing another worktree's `dist`.
+
+`.gitattributes` and `.editorconfig` keep every checkout on LF line endings, so `prettier --check` gives the same result in each worktree whatever `core.autocrlf` is set to.
+
 ## Structure
 
 - `src/pages.mjs`: English page copy and semantic HTML.

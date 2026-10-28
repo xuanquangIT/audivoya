@@ -1,0 +1,6 @@
+interface:
+  display_name: 'Site Worktrees'
+  short_description: 'Create, bootstrap and clean site worktrees with isolated ports'
+  default_prompt: 'Use $site-worktree to create a worktree for this website task.'
+policy:
+  allow_implicit_invocation: true
