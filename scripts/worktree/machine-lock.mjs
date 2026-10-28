@@ -311,6 +311,29 @@ export function runLocked(lock, commandLine) {
   });
 }
 
+/**
+ * Joins command tokens into one shell line. A single token is passed through verbatim (it is
+ * already a shell line, as in `test:e2e`); otherwise tokens that contain whitespace or shell
+ * metacharacters are quoted for the platform shell (cmd.exe on win32, sh elsewhere).
+ * @param {string[]} command
+ * @param {NodeJS.Platform} [platform]
+ * @returns {string}
+ */
+export function shellLine(command, platform = process.platform) {
+  if (command.length === 1) return command[0];
+  const quote =
+    platform === 'win32'
+      ? (/** @type {string} */ token) =>
+          token === '' || /[\s"&|<>^()]/.test(token)
+            ? `"${token.replace(/"/g, '\\"')}"`
+            : token
+      : (/** @type {string} */ token) =>
+          /^[A-Za-z0-9_./:=,@%+-]+$/.test(token)
+            ? token
+            : `'${token.replace(/'/g, `'\\''`)}'`;
+  return command.map(quote).join(' ');
+}
+
 const USAGE =
   'Usage: node scripts/worktree/machine-lock.mjs <name> [--timeout-min 30] -- <command...>';
 
@@ -334,7 +357,7 @@ export async function main(argv = process.argv.slice(2)) {
   const command = argv.slice(separator + 1);
   if (command.length === 0) throw new UsageError('missing command after "--"');
   const lock = await acquireLock(positionals[0], { timeoutMin });
-  return runLocked(lock, command.join(' '));
+  return runLocked(lock, shellLine(command));
 }
 
 if (isMainModule(import.meta.url)) {

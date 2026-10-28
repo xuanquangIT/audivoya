@@ -31,11 +31,12 @@ This repository uses the Audivoya agent platform. How it works — canonical sou
 | Ports, base branch, copied files                                            | `.agents/workspace.json` here                                                             |
 | Hook wiring and permissions                                                 | `.claude/settings.json` here (same structure as the extension's; protected branch `main`) |
 
-Re-vendor from the extension's reviewed `develop`, in a `chore/vendor-agent-platform` worktree:
+Re-vendor from the extension's reviewed `develop`, in a `chore/vendor-agent-tooling` worktree:
 
 ```sh
 EXT="$(dirname "$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")")/Realtime-Dubbing"
 git -C "$EXT" fetch origin
+rm -rf scripts/agents scripts/worktree      # drop files deleted upstream
 git -C "$EXT" archive origin/develop scripts/agents scripts/worktree | tar -x -f -
 node scripts/worktree/wt.mjs doctor          # vendored-file parity
 npm test && npm run check

@@ -31,7 +31,14 @@
       "Read(./.env.local)",
       "Read(./**/*credential*.txt)",
       "Read(./**/realtimedubbing-*.json)",
-      "Read(./**/*service-account*.json)"
+      "Read(./**/*service-account*.json)",
+      "Read(./**/gha-creds-*.json)",
+      "Edit(./**/.env)",
+      "Edit(./**/.env.local)",
+      "Edit(./**/*credential*.txt)",
+      "Edit(./**/realtimedubbing-*.json)",
+      "Edit(./**/*service-account*.json)",
+      "Edit(./**/gha-creds-*.json)"
     ]
   },
   "hooks": {

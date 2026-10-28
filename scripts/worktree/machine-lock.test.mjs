@@ -14,6 +14,7 @@ import {
   parseHeldLocks,
   readOwner,
   releaseLock,
+  shellLine,
   tryAcquire,
   withLock,
 } from './machine-lock.mjs';
@@ -207,4 +208,42 @@ test('CLI runs the command under the lock and propagates its exit code', (t) => 
   });
   assert.equal(usage.status, 2);
   assert.match(usage.stderr, /missing "--"/);
+});
+
+test('shellLine keeps a single shell line verbatim and quotes split tokens', () => {
+  const line = 'npm run build && playwright test';
+  assert.equal(shellLine([line], 'win32'), line);
+  assert.equal(shellLine([line], 'linux'), line);
+  const tokens = ['node', '-e', 'console.log( 1 )', 'a b', '--grep=x'];
+  assert.equal(
+    shellLine(tokens, 'win32'),
+    'node -e "console.log( 1 )" "a b" --grep=x',
+  );
+  assert.equal(
+    shellLine(tokens, 'linux'),
+    "node -e 'console.log( 1 )' 'a b' --grep=x",
+  );
+  assert.equal(shellLine(['echo', "it's"], 'linux'), "echo 'it'\\''s'");
+});
+
+test('CLI keeps arguments that contain spaces intact', (t) => {
+  const name = `test-args-${process.pid}-${Date.now()}`;
+  t.after(() =>
+    fs.rmSync(lockDirectory(name), { recursive: true, force: true }),
+  );
+  const run = spawnSync(
+    process.execPath,
+    [
+      lockScript,
+      name,
+      '--',
+      process.execPath,
+      '-e',
+      'console.log(JSON.stringify(process.argv.slice(1)))',
+      'a b',
+    ],
+    { encoding: 'utf8' },
+  );
+  assert.equal(run.status, 0, run.stderr);
+  assert.match(run.stdout, /\["a b"\]/);
 });

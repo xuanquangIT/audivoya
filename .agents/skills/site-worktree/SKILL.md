@@ -19,18 +19,18 @@ Layout (`$HUB` = parent directory of the main checkout):
 
 ## Commands
 
-| Goal                              | Command                                                                                                                                                      |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Once per clone                    | `node scripts/worktree/wt.mjs init`, then `node scripts/worktree/wt.mjs doctor`                                                                              |
-| Start a task                      | `node scripts/worktree/wt.mjs new docs/caption-prefs --claims src/pages.mjs,docs/VALIDATION.md --task "Explain per-site caption preferences" --owner claude` |
-| Continue a pushed branch          | `node scripts/worktree/wt.mjs new fix/guide-overflow --base origin/fix/guide-overflow`                                                                       |
-| Print a worktree path             | `node scripts/worktree/wt.mjs path caption-prefs`                                                                                                            |
-| Re-bootstrap (missing deps/state) | `node scripts/worktree/setup.mjs` (`--install` forces `npm ci`, `--json` for machine output)                                                                 |
-| See all worktrees                 | `node scripts/worktree/wt.mjs list` (`--json`): branch, slot, port, dirty files, ahead/behind, claims, age                                                   |
-| Check overlaps                    | `node scripts/worktree/wt.mjs claims` — exit 1 means two worktrees claim the same path                                                                       |
-| Show ports                        | `node scripts/worktree/ports.mjs --env`                                                                                                                      |
-| Remove one                        | `node scripts/worktree/wt.mjs rm docs/caption-prefs --delete-branch` (refuses when dirty; `--force` discards)                                                |
-| Remove all merged                 | `node scripts/worktree/wt.mjs prune --merged --dry-run`, then without `--dry-run`                                                                            |
+| Goal                              | Command                                                                                                                                                                                                       |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Once per clone                    | `node scripts/worktree/wt.mjs init`, then `node scripts/worktree/wt.mjs doctor`                                                                                                                               |
+| Start a task                      | `node scripts/worktree/wt.mjs new docs/caption-prefs --claims src/pages.mjs,docs/VALIDATION.md --task "Explain per-site caption preferences" --owner claude`                                                  |
+| Continue a pushed branch          | From the main checkout: `git fetch origin && git worktree add ../worktrees/site/fix-guide-overflow fix/guide-overflow`, then `node scripts/worktree/setup.mjs` inside it (`wt new` refuses existing branches) |
+| Print a worktree path             | `node scripts/worktree/wt.mjs path caption-prefs`                                                                                                                                                             |
+| Re-bootstrap (missing deps/state) | `node scripts/worktree/setup.mjs` (`--install` forces `npm ci`, `--json` for machine output)                                                                                                                  |
+| See all worktrees                 | `node scripts/worktree/wt.mjs list` (`--json`): branch, slot, port, dirty files, ahead/behind, claims, age                                                                                                    |
+| Check overlaps                    | `node scripts/worktree/wt.mjs claims` — exit 1 means two worktrees claim the same path                                                                                                                        |
+| Show ports                        | `node scripts/worktree/ports.mjs --env`                                                                                                                                                                       |
+| Remove one                        | `node scripts/worktree/wt.mjs rm docs/caption-prefs --delete-branch` (refuses when dirty; `--force` discards)                                                                                                 |
+| Remove all merged                 | `node scripts/worktree/wt.mjs prune --merged --dry-run`, then without `--dry-run`                                                                                                                             |
 
 Naming: types `feat fix docs chore ci test refactor perf release deps`; slug lowercase `a-z0-9` with single hyphens, ≤ 40 characters (Windows path budget). Release syncs use `release/site-<x.y.z>` and `release/site-<x.y.z>-live`. `new` fetches `origin`, unsets the upstream so the first `git push -u origin HEAD` creates the branch's own, writes `.worktree.json`, runs setup and warns on claim overlap.
 

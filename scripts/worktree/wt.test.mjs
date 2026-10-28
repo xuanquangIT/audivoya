@@ -315,3 +315,25 @@ test(
     );
   },
 );
+
+test(
+  'wt handles a worktree whose directory was deleted outside wt',
+  { skip: !hasGit && 'git not installed' },
+  (t) => {
+    const { base, main, git, wt } = createFixture(t);
+    const gone = path.join(base, 'wt', 'feat-gone');
+    const created = wt(['new', 'feat/gone', '--no-setup', '--no-fetch']);
+    assert.equal(created.status, 0, created.stderr);
+    fs.rmSync(gone, { recursive: true, force: true });
+
+    const again = wt(['new', 'feat/gone', '--no-setup', '--no-fetch']);
+    assert.equal(again.status, 1);
+    assert.match(again.stderr, /registered to a missing worktree/);
+
+    const removed = wt(['rm', 'feat/gone', '--delete-branch']);
+    assert.equal(removed.status, 0, removed.stderr);
+    assert.match(removed.stdout, /pruned stale worktree entry/);
+    assert.match(removed.stdout, /deleted local branch feat\/gone/);
+    assert.equal(git(['branch', '--list', 'feat/gone'], main).trim(), '');
+  },
+);

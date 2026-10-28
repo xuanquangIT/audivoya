@@ -55,7 +55,11 @@ function finishRemoval(worktreePath, stderr) {
 }
 
 function removeWorktree(ctx, worktree, { force, deleteBranch }) {
-  if (!worktree.prunable) {
+  if (worktree.prunable) {
+    // The directory is already gone; drop the stale entry so git releases the branch.
+    git(['worktree', 'prune'], { cwd: ctx.mainRoot });
+    console.log(`pruned stale worktree entry ${worktree.path}`);
+  } else {
     const args = ['worktree', 'remove'];
     if (force) args.push('--force');
     if (force && worktree.locked) args.push('--force');
@@ -64,8 +68,8 @@ function removeWorktree(ctx, worktree, { force, deleteBranch }) {
     if (!result.ok && !finishRemoval(worktree.path, result.stderr))
       throw new Error(removalFailureMessage(worktree.path, result.stderr));
     if (!result.ok) git(['worktree', 'prune'], { cwd: ctx.mainRoot });
+    console.log(`removed worktree ${worktree.path}`);
   }
-  console.log(`removed worktree ${worktree.path}`);
   if (!deleteBranch || !worktree.branch) return;
   if (isProtectedBranch(worktree.branch, ctx.config.protectedBranches)) {
     console.log(`kept protected branch ${worktree.branch}`);

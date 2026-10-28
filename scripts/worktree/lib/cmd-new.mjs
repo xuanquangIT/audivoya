@@ -81,6 +81,13 @@ export async function cmdNew(
     throw new Error(
       `${target} already exists; pick another slug or remove it with wt rm`,
     );
+  const stale = collectWorktrees(ctx).find(
+    (w) => w.prunable && w.branch === spec.branch,
+  );
+  if (stale)
+    throw new Error(
+      `branch ${spec.branch} is registered to a missing worktree (${stale.path}); run wt prune (or wt rm ${spec.branch} --delete-branch) first`,
+    );
   if (localBranchExists(ctx.mainRoot, spec.branch))
     throw new Error(
       `branch ${spec.branch} already exists; pick another slug or resume it with: git worktree add "${target}" ${spec.branch}`,

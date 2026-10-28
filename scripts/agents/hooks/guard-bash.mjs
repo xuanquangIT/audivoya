@@ -73,14 +73,16 @@ const READERS = new Set([
 
 /** Search tools: the first positional is a pattern, not a file (unless -e/-f). */
 const SEARCHERS = {
-  grep: { values: 'efmABCdD', pattern: 'e', file: 'f' },
-  egrep: { values: 'efmABCdD', pattern: 'e', file: 'f' },
-  fgrep: { values: 'efmABCdD', pattern: 'e', file: 'f' },
-  rg: { values: 'efgtTmABCjMEr', pattern: 'e', file: 'f' },
-  sed: { values: 'efl', pattern: 'e', file: 'f' },
-  awk: { values: 'fvF', pattern: '', file: 'f' },
-  gawk: { values: 'fvF', pattern: '', file: 'f' },
+  grep: { values: 'efmABCdD', pattern: 'e', file: 'f', select: '' },
+  egrep: { values: 'efmABCdD', pattern: 'e', file: 'f', select: '' },
+  fgrep: { values: 'efmABCdD', pattern: 'e', file: 'f', select: '' },
+  rg: { values: 'efgtTmABCjMEr', pattern: 'e', file: 'f', select: 'g' },
+  sed: { values: 'efl', pattern: 'e', file: 'f', select: '' },
+  awk: { values: 'fvF', pattern: '', file: 'f', select: '' },
+  gawk: { values: 'fvF', pattern: '', file: 'f', select: '' },
 };
+/** File-selector flags: `--include=.env` or `rg -g .env` reads that file like a path argument. */
+const SEARCH_SELECT_LONG = new Set(['--include', '--glob', '--iglob']);
 const SEARCH_VALUE_LONG = new Set([
   '--regexp',
   '--expression',
@@ -230,6 +232,8 @@ function classifyWords(rawWords, ctx, depth) {
   const nested = nestedScript(program, args);
   if (nested !== undefined) return classifyLine(nested, ctx, depth + 1);
   if (program === 'git') return classifyGit(args, ctx);
+  if (program === 'gh' && args[0] === 'api')
+    return classifyGhApi(args.slice(1));
   if (READERS.has(program) || (program === 'gh' && args[0] === 'gist'))
     return firstSecret(program, args);
   if (SEARCHERS[program])
@@ -322,6 +326,8 @@ function searchFileArgs(spec, args) {
         explicitPattern = true;
         if (value) files.push(value);
       }
+      if (SEARCH_SELECT_LONG.has(name) && value && !value.startsWith('!'))
+        files.push(value);
     } else if (options && /^-[^-]/.test(arg)) {
       for (let j = 1; j < arg.length; j += 1) {
         if (!spec.values.includes(arg[j])) continue;
@@ -331,6 +337,8 @@ function searchFileArgs(spec, args) {
           explicitPattern = true;
           if (value) files.push(value);
         }
+        if (arg[j] === spec.select && value && !value.startsWith('!'))
+          files.push(value);
         break;
       }
     } else if (!explicitPattern && !patternSeen) {
@@ -456,6 +464,62 @@ function keepsSecretName(destination) {
     ['.', '..', '~'].includes(normalized) ||
     Boolean(secretIn(normalized))
   );
+}
+
+const GH_API_VALUE_OPTIONS = new Set([
+  '-H',
+  '--header',
+  '-q',
+  '--jq',
+  '-t',
+  '--template',
+  '--hostname',
+  '--cache',
+  '-p',
+  '--preview',
+]);
+const GH_API_BODY_OPTIONS = new Set([
+  '-f',
+  '--raw-field',
+  '-F',
+  '--field',
+  '--input',
+]);
+/** Endpoints behind the "Never" list: protection, rulesets, environments, secrets, variables, access. */
+const GH_API_SENSITIVE =
+  /(?:^|\/)(?:branches\/[^/]+\/protection|rulesets|environments|actions\/(?:secrets|variables|permissions)|dependabot\/secrets|codespaces\/secrets|collaborators|invitations|hooks|keys|teams|members|memberships|transfer)(?:\/|$)|^\/?(?:repos\/[^/]+\/[^/]+|orgs\/[^/]+)\/?$/;
+
+/**
+ * `gh api` stays prompt-free for reads and ordinary writes (PR comments, labels, reviews);
+ * a mutating call to a settings, protection, environment, secret or access endpoint is blocked.
+ */
+function classifyGhApi(args) {
+  let method;
+  let body = false;
+  let endpoint;
+  for (let i = 0; i < args.length; i += 1) {
+    const [name, inline] = splitOnce(args[i], '=');
+    if (name === '-X' || name === '--method') {
+      method = (inline ?? args[(i += 1)] ?? '').toUpperCase();
+    } else if (GH_API_BODY_OPTIONS.has(name)) {
+      body = true;
+      if (inline === undefined) i += 1;
+    } else if (GH_API_VALUE_OPTIONS.has(name)) {
+      if (inline === undefined) i += 1;
+    } else if (!args[i].startsWith('-') && endpoint === undefined) {
+      endpoint = args[i];
+    }
+  }
+  const mutating = method ? method !== 'GET' && method !== 'HEAD' : body;
+  if (!mutating || !endpoint) return ALLOW;
+  const path = endpoint.replace(/^https?:\/\/[^/]+/, '').split('?')[0];
+  if (!GH_API_SENSITIVE.test(path)) return ALLOW;
+  return {
+    block: true,
+    reason:
+      `Blocked: gh api ${method ?? 'POST'} ${path} changes repository or organization settings, protection, environments, secrets, variables or access. ` +
+      'Agents never change those (AGENTS.md, autonomy policy); ask the maintainer. Reads and PR, issue, label or review calls stay allowed.',
+  };
 }
 
 function classifyGit(args, ctx) {
