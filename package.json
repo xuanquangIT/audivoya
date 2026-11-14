@@ -19,7 +19,7 @@
     "wt": "node scripts/worktree/wt.mjs"
   },
   "devDependencies": {
-    "@playwright/test": "1.63.0",
+    "@playwright/test": "1.65.0",
     "prettier": "3.9.9"
   }
 }
